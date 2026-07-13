@@ -399,12 +399,12 @@
     navigator.geolocation.getCurrentPosition(pos=>{
       const {latitude:lat,longitude:lng}=pos.coords;
       const zones=[
-        {name:'🏪 Lawson',lat:35.3885,lng:139.4275},
-        {name:'🍱 Coop Cafeteria',lat:35.3890,lng:139.4265},
-        {name:'🧂 Salt Dining',lat:35.3888,lng:139.4258},
-        {name:'🥖 Subway',lat:35.3882,lng:139.4280},
-        {name:'📚 Library',lat:35.3895,lng:139.4260},
-        {name:'🏋️ Gym',lat:35.3878,lng:139.4270},
+        {name:'🏪 Lawson',lat:35.3870481,lng:139.4259664},
+        {name:'🍱 Coop Cafeteria',lat:35.3872544,lng:139.4259882},
+        {name:'🧂 Salt Dining',lat:35.3896278,lng:139.4278322},
+        {name:'🥖 Subway',lat:35.3875548,lng:139.4274225},
+        {name:'📚 Library',lat:35.3882948,lng:139.4273095},
+        {name:'🏋️ Gym',lat:35.3902808,lng:139.4269813},
       ];
       let nearest=null,minD=Infinity;
       zones.forEach(z=>{
