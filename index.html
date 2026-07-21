@@ -251,26 +251,28 @@
       <div class="lbl">👟 Steps today</div>
       <input type="number" id="steps-input" class="num-input" placeholder="e.g. 8200" style="margin-top:6px;">
       <div style="font-size:11px;color:var(--slateD);margin-top:4px;">Check iPhone Health app → Steps</div>
+      <button class="btn-primary" style="margin-top:14px;" onclick="saveSteps()">💾 Save steps</button>
+      <div class="saved-badge" id="steps-saved">✅ Saved!</div>
+    </div>
 
-      <div class="lbl" style="margin-top:16px;">🏋️ Workout</div>
-      <div class="workout-btns">
-        <button class="workout-btn selected" onclick="selectWorkout(this,'None')">😴 None</button>
-        <button class="workout-btn" onclick="selectWorkout(this,'Walking')">🚶 Walk</button>
+    <p class="section-label">Add Workout</p>
+    <div class="activity-box">
+      <div class="lbl">🏋️ Type</div>
+      <div class="workout-btns" id="workout-type-btns">
+        <button class="workout-btn selected" onclick="selectWorkout(this,'Walking')">🚶 Walk</button>
         <button class="workout-btn" onclick="selectWorkout(this,'Running')">🏃 Run</button>
         <button class="workout-btn" onclick="selectWorkout(this,'Gym')">🏋️ Gym</button>
         <button class="workout-btn" onclick="selectWorkout(this,'Swimming')">🏊 Swim</button>
         <button class="workout-btn" onclick="selectWorkout(this,'Cycling')">🚴 Cycle</button>
         <button class="workout-btn" onclick="selectWorkout(this,'Other')">➕ Other</button>
       </div>
-
-      <div id="duration-wrap" style="display:none;margin-top:12px;">
-        <div class="lbl">⏱ Duration (minutes)</div>
-        <input type="number" id="duration-input" class="num-input" placeholder="e.g. 45" style="margin-top:6px;">
-      </div>
-
-      <button class="btn-primary" style="margin-top:16px;" onclick="saveDailySummary()">💾 Save today's summary</button>
-      <div class="saved-badge" id="activity-saved">✅ Saved!</div>
+      <div class="lbl" style="margin-top:14px;">⏱ Duration (minutes)</div>
+      <input type="number" id="duration-input" class="num-input" placeholder="e.g. 45" style="margin-top:6px;">
+      <button class="btn-primary" style="margin-top:14px;" onclick="addWorkout()">+ Add workout</button>
     </div>
+
+    <p class="section-label">Today's Workouts</p>
+    <div id="today-workouts"><div style="font-size:13px;color:var(--slate);">No workouts logged today.</div></div>
 
     <p class="section-label">This Week</p>
     <div id="weekly-activity-list"></div>
@@ -345,7 +347,7 @@
     document.getElementById('page-heading').textContent = title;
     document.getElementById('page-subheading').textContent = sub;
     if (id === 'insights') renderInsights();
-    if (id === 'activity') renderWeeklyActivity();
+    if (id === 'activity') { renderWeeklyActivity(); renderTodayWorkouts(); }
     if (id === 'timetable') renderTodayList();
   }
 
@@ -607,27 +609,65 @@
   }
 
   // ── Activity ──
-  let selectedWorkout = 'None';
+  let selectedWorkout = 'Walking';
   function selectWorkout(btn, type) {
     document.querySelectorAll('.workout-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
     selectedWorkout = type;
-    document.getElementById('duration-wrap').style.display = type==='None'?'none':'block';
   }
 
-  function saveDailySummary() {
-    const steps = parseInt(document.getElementById('steps-input').value)||0;
-    const duration = parseInt(document.getElementById('duration-input').value)||0;
-    const jst = jstNow();
+  function saveSteps() {
+    const steps = parseInt(document.getElementById('steps-input').value) || 0;
+    const log = JSON.parse(localStorage.getItem('sfc_activity_log') || '{}');
     const dateKey = jstDateKey();
-    const dayName = DAY_LABELS[jst.getUTCDay()];
-    const log = JSON.parse(localStorage.getItem('sfc_activity_log')||'{}');
-    log[dateKey] = {date:dateKey, day:dayName, steps, workout:selectedWorkout, duration};
+    if (!log[dateKey]) log[dateKey] = {date:dateKey, day:DAY_LABELS[jstDOW()], steps:0, workouts:[]};
+    log[dateKey].steps = steps;
     localStorage.setItem('sfc_activity_log', JSON.stringify(log));
-    const b = document.getElementById('activity-saved');
+    const b = document.getElementById('steps-saved');
     b.style.display='block'; setTimeout(()=>b.style.display='none',2000);
     renderWeeklyActivity();
   }
+
+  function addWorkout() {
+    const duration = parseInt(document.getElementById('duration-input').value) || 0;
+    if (duration <= 0) { alert('Please enter duration in minutes.'); return; }
+    const log = JSON.parse(localStorage.getItem('sfc_activity_log') || '{}');
+    const dateKey = jstDateKey();
+    if (!log[dateKey]) log[dateKey] = {date:dateKey, day:DAY_LABELS[jstDOW()], steps:0, workouts:[]};
+    if (!log[dateKey].workouts) log[dateKey].workouts = [];
+    log[dateKey].workouts.push({type:selectedWorkout, duration});
+    localStorage.setItem('sfc_activity_log', JSON.stringify(log));
+    document.getElementById('duration-input').value = '';
+    renderTodayWorkouts();
+    renderWeeklyActivity();
+  }
+
+  function removeWorkout(dateKey, idx) {
+    const log = JSON.parse(localStorage.getItem('sfc_activity_log') || '{}');
+    if (!log[dateKey] || !log[dateKey].workouts) return;
+    log[dateKey].workouts.splice(idx, 1);
+    localStorage.setItem('sfc_activity_log', JSON.stringify(log));
+    renderTodayWorkouts();
+    renderWeeklyActivity();
+  }
+
+  function renderTodayWorkouts() {
+    const log = JSON.parse(localStorage.getItem('sfc_activity_log') || '{}');
+    const dateKey = jstDateKey();
+    const entry = log[dateKey];
+    const el = document.getElementById('today-workouts');
+    if (!el) return;
+    const workouts = entry && entry.workouts ? entry.workouts : [];
+    if (workouts.length === 0) { el.innerHTML='<div style="font-size:13px;color:var(--slate);">No workouts logged today.</div>'; return; }
+    el.innerHTML = workouts.map((w,i) => `
+      <div class="card">
+        <div class="card-icon ci-orange">🏋️</div>
+        <div class="card-body"><h3>${w.type}</h3><p>${w.duration} min</p></div>
+        <button onclick="removeWorkout('${dateKey}',${i})" style="background:rgba(248,113,113,.15);border:none;border-radius:6px;color:var(--red);font-size:11px;padding:4px 8px;cursor:pointer;">✕</button>
+      </div>`).join('');
+  }
+
+  function saveDailySummary() { saveSteps(); }
 
   function renderWeeklyActivity() {
     const log = JSON.parse(localStorage.getItem('sfc_activity_log')||'{}');
@@ -641,8 +681,9 @@
       const label = DAY_LABELS[d.getUTCDay()];
       const isToday = dk===todayKey;
       if (!entry) return `<div class="card" style="opacity:.4;"><div class="card-icon ci-purple" style="font-size:12px;font-weight:700;">${label}</div><div class="card-body"><h3 style="color:var(--slate);">No data</h3></div>${isToday?'<div class="card-right" style="color:var(--mint);font-size:11px;">Today</div>':''}</div>`;
-      const wt = entry.workout==='None'?'Rest day':`${entry.workout} · ${entry.duration} min`;
-      return `<div class="card"${isToday?' style="border:1px solid rgba(13,148,136,.3);"':''}><div class="card-icon ci-teal" style="font-size:12px;font-weight:700;">${label}</div><div class="card-body"><h3>👟 ${entry.steps.toLocaleString()} steps</h3><p>${wt}</p></div>${isToday?'<div class="card-right" style="color:var(--mint);font-size:11px;">Today</div>':''}</div>`;
+      const workouts = entry.workouts || (entry.workout && entry.workout!=='None' ? [{type:entry.workout,duration:entry.duration}] : []);
+      const wt = workouts.length===0 ? 'Rest day' : workouts.map(w=>`${w.type} ${w.duration}min`).join(' · ');
+      return `<div class="card"${isToday?' style="border:1px solid rgba(13,148,136,.3);"':''}><div class="card-icon ci-teal" style="font-size:12px;font-weight:700;">${label}</div><div class="card-body"><h3>👟 ${(entry.steps||0).toLocaleString()} steps</h3><p>${wt}</p></div>${isToday?'<div class="card-right" style="color:var(--mint);font-size:11px;">Today</div>':''}</div>`;
     }).join('');
   }
 
@@ -766,6 +807,7 @@
   updateCalorieBalance();
   updateHomeWarnings();
   renderWeeklyActivity();
+  renderTodayWorkouts();
   loadTimetable();
   setInterval(updateScheduleHome, 60000);
   setTimeout(getRecommendation, 1500);
