@@ -219,6 +219,7 @@
       <button class="loc-btn" onclick="selectLoc(this,'Other')"><span class="loc-emoji">📍</span>Other</button>
     </div>
     <button class="btn-secondary" onclick="showManualEntry()">✏️ &nbsp;Enter manually instead</button>
+    <button class="btn-secondary" onclick="clearOldMeals()" style="color:var(--red);font-size:12px;padding:8px;">🗑 Clear old/leftover meals</button>
 
     <p class="section-label">Today's Meals</p>
     <div id="meal-log-list"><div style="font-size:13px;color:var(--slate);text-align:center;padding:20px;">No meals logged today</div></div>
@@ -421,6 +422,17 @@
     input.value = '';
   }
 
+  function clearOldMeals() {
+    if (!confirm('Clear all meals without a date (leftover from old version)?')) return;
+    const all = JSON.parse(localStorage.getItem('sfc_meals') || '[]');
+    const cleaned = all.filter(m => m.date);
+    localStorage.setItem('sfc_meals', JSON.stringify(cleaned));
+    renderMealLog();
+    updateCalorieBalance();
+    updateHomeWarnings();
+    alert('Done! Old meals cleared.');
+  }
+
   function editMealKcal(idx) {
     const meals = JSON.parse(localStorage.getItem('sfc_meals') || '[]');
     const meal = meals[idx];
@@ -464,13 +476,14 @@
   }
 
   function renderMealLog() {
-    const meals = todayMeals();
+    const all = JSON.parse(localStorage.getItem('sfc_meals') || '[]');
+    const today = jstDateKey();
+    // Get today's meals with their original indices in the full array
+    const todayWithIdx = all.map((m,i) => ({...m, _idx:i})).filter(m => m.date === today);
     const el = document.getElementById('meal-log-list');
     if (!el) return;
-    if (meals.length === 0) { el.innerHTML='<div style="font-size:13px;color:var(--slate);text-align:center;padding:20px;">No meals logged today</div>'; return; }
-    el.innerHTML = [...meals].reverse().map((m,i) => {
-      const idx = meals.length - 1 - i;
-      return `
+    if (todayWithIdx.length === 0) { el.innerHTML='<div style="font-size:13px;color:var(--slate);text-align:center;padding:20px;">No meals logged today</div>'; return; }
+    el.innerHTML = [...todayWithIdx].reverse().map(m => `
       <div class="meal-item">
         <div class="meal-left">
           <div class="meal-loc-dot" style="background:${LOC_COLOR[m.location]||'#94A3B8'}"></div>
@@ -478,9 +491,9 @@
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
           <div class="meal-kcal">${m.kcal} kcal</div>
-          <button onclick="editMealKcal(${idx})" style="background:rgba(255,255,255,.08);border:none;border-radius:6px;color:var(--slate);font-size:11px;padding:4px 8px;cursor:pointer;">✏️</button>
+          <button onclick="editMealKcal(${m._idx})" style="background:rgba(255,255,255,.08);border:none;border-radius:6px;color:var(--slate);font-size:11px;padding:4px 8px;cursor:pointer;">✏️</button>
         </div>
-      </div>`}).join('');
+      </div>`).join('');
   }
 
   function updateCalorieBalance() {
