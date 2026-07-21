@@ -176,14 +176,14 @@
           <circle cx="43" cy="43" r="36" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="7"/>
           <circle cx="43" cy="43" r="36" fill="none" stroke="#0D9488" stroke-width="7" stroke-dasharray="226" stroke-dashoffset="91" stroke-linecap="round"/>
         </svg>
-        <div class="ring-center"><span class="ring-num">60%</span><span class="ring-unit">of goal</span></div>
+        <div class="ring-center"><span class="ring-num" id="ring-pct">60%</span><span class="ring-unit">of goal</span></div>
       </div>
       <div class="ring-info">
         <h2>Today's Balance</h2>
         <div class="ring-row">
-          <div class="ring-stat"><div class="val vg">1,240</div><div class="lbl">Eaten</div></div>
+          <div class="ring-stat"><div class="val vg" id="calories-eaten">1,240</div><div class="lbl">Eaten</div></div>
           <div class="ring-stat"><div class="val vo">380</div><div class="lbl">Burned</div></div>
-          <div class="ring-stat"><div class="val vr">−480</div><div class="lbl">Deficit</div></div>
+          <div class="ring-stat"><div class="val vr" id="calories-deficit">−480</div><div class="lbl">Deficit</div></div>
         </div>
       </div>
     </div>
@@ -191,7 +191,7 @@
     <div class="suggestion-card">
       <div class="tag">📍 Near Lawson · <span id="current-time"></span></div>
       <div class="meal">Tuna onigiri + green tea</div>
-      <div class="reason">480kcal deficit and light activity today. A snack now keeps energy up for the afternoon.</div>
+      <div class="reason" id="ai-recommendation">480kcal deficit and light activity today. A snack now keeps energy up for the afternoon.</div>
       <div class="kcal-badge">~320 kcal</div>
     </div>
     <p class="section-label">⚠️ Pattern Alerts</p>
@@ -242,6 +242,7 @@
     </div>
     <button class="btn-secondary">✏️ &nbsp;Enter manually instead</button>
     <p class="section-label">Today's Meals</p>
+    <div id="meal-log-list">
     <div class="meal-item">
       <div class="meal-left"><div class="meal-loc-dot mld-lawson"></div><div><div class="meal-name">Salmon onigiri</div><div class="meal-meta">🏪 Lawson · 8:42 AM</div></div></div>
       <div class="meal-kcal">190 kcal</div>
@@ -257,6 +258,7 @@
     <div class="meal-item">
       <div class="meal-left"><div class="meal-loc-dot mld-subway"></div><div><div class="meal-name">Tuna sub 6"</div><div class="meal-meta">🥖 Subway · 9:15 AM</div></div></div>
       <div class="meal-kcal">340 kcal</div>
+    </div>
     </div>
   </div>
 
@@ -419,7 +421,126 @@
   startGPS();
 
   function selectLoc(btn){document.querySelectorAll('.loc-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');}
-  function handlePhoto(input){if(input.files&&input.files[0])alert('📷 Photo received!\n\nIn the real app, this sends to GPT-4o Vision which identifies the food and logs calories automatically.');}
+  const API = '/.netlify/functions/ai';
+
+  async function handlePhoto(input) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+
+    // Show loading state
+    const zone = document.querySelector('.photo-zone h3');
+    const origText = zone.textContent;
+    zone.textContent = '🔍 Identifying food...';
+
+    try {
+      // Convert image to base64
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      // Call GPT-4o Vision
+      const res = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'food', imageBase64: base64 })
+      });
+      const data = await res.json();
+
+      if (data.name) {
+        // Add to meal log
+        addMealToLog(data.name, data.kcal, data.location);
+        zone.textContent = origText;
+        alert(`✅ Logged!\n\n${data.name} (${data.nameJa})\n${data.kcal} kcal\n📍 ${data.location}`);
+      } else {
+        zone.textContent = origText;
+        alert('Could not identify food. Try again or enter manually.');
+      }
+    } catch (err) {
+      zone.textContent = origText;
+      alert('Error: ' + err.message);
+    }
+  }
+
+  function addMealToLog(name, kcal, location) {
+    const meals = JSON.parse(localStorage.getItem('sfc_meals') || '[]');
+    const now = new Date();
+    const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+    const locEmoji = { 'Lawson':'🏪', 'Coop Cafeteria':'🍱', 'Salt Dining':'🧂', 'Subway':'🥖', 'Other':'📍' };
+    meals.push({ name, kcal, location, time, emoji: locEmoji[location] || '📍' });
+    localStorage.setItem('sfc_meals', JSON.stringify(meals));
+    renderMealLog();
+    updateCalorieBalance();
+  }
+
+  function renderMealLog() {
+    const meals = JSON.parse(localStorage.getItem('sfc_meals') || '[]');
+    const container = document.getElementById('meal-log-list');
+    if (!container) return;
+    if (meals.length === 0) {
+      container.innerHTML = '<div style="font-size:13px;color:var(--slate);text-align:center;padding:20px;">No meals logged today</div>';
+      return;
+    }
+    container.innerHTML = meals.map(m => `
+      <div class="meal-item">
+        <div class="meal-left">
+          <div class="meal-loc-dot" style="background:${locColor(m.location)}"></div>
+          <div>
+            <div class="meal-name">${m.name}</div>
+            <div class="meal-meta">${m.emoji} ${m.location} · ${m.time}</div>
+          </div>
+        </div>
+        <div class="meal-kcal">${m.kcal} kcal</div>
+      </div>
+    `).reverse().join('');
+  }
+
+  function locColor(loc) {
+    return { 'Lawson':'#0D9488', 'Coop Cafeteria':'#A78BFA', 'Salt Dining':'#A78BFA', 'Subway':'#FB923C' }[loc] || '#94A3B8';
+  }
+
+  function updateCalorieBalance() {
+    const meals = JSON.parse(localStorage.getItem('sfc_meals') || '[]');
+    const total = meals.reduce((sum, m) => sum + (m.kcal || 0), 0);
+    const goal = 2000;
+    const deficit = goal - total;
+    const pct = Math.min(Math.round((total / goal) * 100), 100);
+    const el = document.getElementById('calories-eaten');
+    const defEl = document.getElementById('calories-deficit');
+    const pctEl = document.getElementById('ring-pct');
+    if (el) el.textContent = total.toLocaleString();
+    if (defEl) defEl.textContent = deficit > 0 ? '−' + deficit : '+' + Math.abs(deficit);
+    if (pctEl) pctEl.textContent = pct + '%';
+  }
+
+  async function getRecommendation() {
+    const meals = JSON.parse(localStorage.getItem('sfc_meals') || '[]');
+    const total = meals.reduce((sum, m) => sum + (m.kcal || 0), 0);
+    const deficit = 2000 - total;
+    const now = new Date();
+    const timeOfDay = now.getHours() < 11 ? 'morning' : now.getHours() < 14 ? 'lunch time' : now.getHours() < 17 ? 'afternoon' : 'evening';
+    const location = document.getElementById('current-location').textContent;
+
+    try {
+      const res = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'recommend', deficit, activityLevel: document.getElementById('activity-label').textContent, location, timeOfDay })
+      });
+      const data = await res.json();
+      const el = document.getElementById('ai-recommendation');
+      if (el && data.recommendation) el.textContent = data.recommendation;
+    } catch (err) {
+      console.error('Recommendation error:', err);
+    }
+  }
+
+  // Load meal log and update balance on start
+  renderMealLog();
+  updateCalorieBalance();
+  setTimeout(getRecommendation, 2000);
 
   let accelRunning=false,accelBuffer=[];
   function startAccel(){
