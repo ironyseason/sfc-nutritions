@@ -186,7 +186,6 @@
         <h2>Today's Balance</h2>
         <div class="ring-row">
           <div class="ring-stat"><div class="val vg" id="calories-eaten">0</div><div class="lbl">Eaten</div></div>
-          <div class="ring-stat"><div class="val vo" id="calories-burned-home">0</div><div class="lbl">Burned</div></div>
           <div class="ring-stat"><div class="val vr" id="calories-deficit">0</div><div class="lbl">Deficit</div></div>
         </div>
       </div>
@@ -271,41 +270,19 @@
     <p class="section-label">This Week's Pattern</p>
     <div class="week-grid">
       <h3>Where you ate 📍</h3>
-      <div class="week-days">
-        <div class="week-day"><div class="day-label">MON</div><div class="week-dot lawson">🏪</div><div class="week-dot-label">Lawson</div></div>
-        <div class="week-day"><div class="day-label">TUE</div><div class="week-dot lawson">🏪</div><div class="week-dot-label">Lawson</div></div>
-        <div class="week-day"><div class="day-label">WED</div><div class="week-dot cafe">🍽️</div><div class="week-dot-label">Cafe</div></div>
-        <div class="week-day"><div class="day-label">THU</div><div class="week-dot lawson">🏪</div><div class="week-dot-label">Lawson</div></div>
-        <div class="week-day"><div class="day-label">FRI</div><div class="week-dot subway">🥖</div><div class="week-dot-label">Subway</div></div>
-        <div class="week-day"><div class="day-label">SAT</div><div class="week-dot lawson">🏪</div><div class="week-dot-label">Lawson</div></div>
-        <div class="week-day"><div class="day-label">SUN</div><div class="week-dot today lawson">🏪</div><div class="week-dot-label">Today</div></div>
-      </div>
+      <div class="week-days" id="insights-week-days"></div>
     </div>
     <div class="loc-chart">
       <h3>Location breakdown this week</h3>
-      <div class="loc-bar-row"><div class="loc-bar-label">🏪 Lawson</div><div class="loc-bar-track"><div class="loc-bar-fill lawson" style="width:71%"></div></div><div class="loc-bar-count">5×</div></div>
-      <div class="loc-bar-row"><div class="loc-bar-label">🍱 Coop</div><div class="loc-bar-track"><div class="loc-bar-fill cafe" style="width:14%"></div></div><div class="loc-bar-count">1×</div></div>
-      <div class="loc-bar-row"><div class="loc-bar-label">🧂 Salt</div><div class="loc-bar-track"><div class="loc-bar-fill cafe" style="width:0%"></div></div><div class="loc-bar-count">0×</div></div>
-      <div class="loc-bar-row"><div class="loc-bar-label">🥖 Subway</div><div class="loc-bar-track"><div class="loc-bar-fill subway" style="width:14%"></div></div><div class="loc-bar-count">1×</div></div>
+      <div id="insights-loc-chart"></div>
     </div>
     <p class="section-label">Warnings</p>
-    <div class="warning-card">
-      <div class="warn-icon">🏪</div>
-      <div><div class="warn-title">Too much Lawson</div><div class="warn-body">5 out of 7 days. High sodium, low vegetables. Try mixing in the cafeteria more next week.</div></div>
-    </div>
-    <div class="warning-card">
-      <div class="warn-icon">🧂</div>
-      <div><div class="warn-title">Sodium high this week</div><div class="warn-body">Estimated 3,800mg avg/day vs 2,300mg recommended. Onigiri and packaged items add up fast.</div></div>
+    <div id="insights-warnings">
+      <div style="font-size:13px;color:var(--slate);text-align:center;padding:20px;">Log some meals to see patterns.</div>
     </div>
     <p class="section-label">Next Week Rotation</p>
-    <div class="chip-row">
-      <span class="rotation-tag rt-cafe">🍽️ Mon</span>
-      <span class="rotation-tag rt-lawson">🏪 Tue</span>
-      <span class="rotation-tag rt-subway">🥖 Wed</span>
-      <span class="rotation-tag rt-cafe">🍽️ Thu</span>
-      <span class="rotation-tag rt-lawson">🏪 Fri</span>
-    </div>
-    <div style="font-size:11px;color:var(--slate);margin-top:4px;margin-bottom:12px;">AI-suggested rotation for better variety</div>
+    <div id="insights-rotation" class="chip-row"></div>
+    <div style="font-size:11px;color:var(--slate);margin-top:4px;margin-bottom:12px;">Suggested rotation for better variety</div>
     <div class="card">
       <div class="card-icon ci-green">💡</div>
       <div class="card-body"><h3>Aim: 2× Coop, 1× Salt, 2× Lawson, 1× Subway</h3><p>Better nutritional balance. Mixing both cafeterias adds more variety to your week.</p></div>
@@ -314,18 +291,6 @@
 
   <!-- ACTIVITY -->
   <div class="page" id="page-activity">
-    <p class="section-label">Current State</p>
-    <div class="activity-state">
-      <div class="state-label">Classified as</div>
-      <div class="state-val" id="activity-label">Tap Start to begin</div>
-      <div class="accel-values">
-        <div class="accel-item"><div class="axis">X</div><div class="av" id="ax">—</div></div>
-        <div class="accel-item"><div class="axis">Y</div><div class="av" id="ay">—</div></div>
-        <div class="accel-item"><div class="axis">Z</div><div class="av" id="az">—</div></div>
-      </div>
-    </div>
-    <button class="btn-primary" id="accel-btn" onclick="startAccel()">Start Sensing</button>
-
     <p class="section-label">Today's Summary</p>
     <div class="activity-state">
       <div style="display:flex;flex-direction:column;gap:14px;">
@@ -509,12 +474,15 @@
   function addMealToLog(name, kcal, location) {
     const meals = JSON.parse(localStorage.getItem('sfc_meals') || '[]');
     const now = new Date();
-    const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+    const jst = new Date(now.getTime() + 9*60*60*1000);
+    const time = jst.getUTCHours().toString().padStart(2,'0') + ':' + jst.getUTCMinutes().toString().padStart(2,'0');
+    const dateKey = jst.toISOString().split('T')[0];
     const locEmoji = { 'Lawson':'🏪', 'Coop Cafeteria':'🍱', 'Salt Dining':'🧂', 'Subway':'🥖', 'Other':'📍' };
-    meals.push({ name, kcal, location, time, emoji: locEmoji[location] || '📍' });
+    meals.push({ name, kcal, location, time, date: dateKey, emoji: locEmoji[location] || '📍' });
     localStorage.setItem('sfc_meals', JSON.stringify(meals));
     renderMealLog();
     updateCalorieBalance();
+    renderInsights();
   }
 
   function renderMealLog() {
@@ -552,11 +520,9 @@
     const el = document.getElementById('calories-eaten');
     const defEl = document.getElementById('calories-deficit');
     const pctEl = document.getElementById('ring-pct');
-    const burnHomeEl = document.getElementById('calories-burned-home');
     if (el) el.textContent = total.toLocaleString();
     if (defEl) defEl.textContent = deficit > 0 ? '−' + deficit : '+' + Math.abs(deficit);
     if (pctEl) pctEl.textContent = pct + '%';
-    if (burnHomeEl) burnHomeEl.textContent = Math.round(totalBurn);
   }
 
   async function getRecommendation() {
@@ -571,7 +537,7 @@
       const res = await fetch(API, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'recommend', deficit, activityLevel: document.getElementById('activity-label').textContent, location, timeOfDay })
+        body: JSON.stringify({ type: 'recommend', deficit, activityLevel: 'light activity', location, timeOfDay })
       });
       const data = await res.json();
       const el = document.getElementById('ai-recommendation');
@@ -586,39 +552,6 @@
   updateCalorieBalance();
   setTimeout(getRecommendation, 2000);
 
-  let accelRunning=false,accelBuffer=[],totalSteps=0,totalBurn=0;
-  function startAccel(){
-    if(accelRunning){window.removeEventListener('devicemotion',onMotion);accelRunning=false;document.getElementById('accel-btn').textContent='Start Sensing';document.getElementById('activity-label').textContent='Stopped';return;}
-    const go=()=>{window.addEventListener('devicemotion',onMotion);accelRunning=true;document.getElementById('accel-btn').textContent='Stop Sensing';};
-    if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){
-      DeviceMotionEvent.requestPermission().then(s=>{if(s==='granted')go();else alert('Motion permission denied.');}).catch(console.error);
-    }else go();
-  }
-  function onMotion(e){
-    const a=e.accelerationIncludingGravity;if(!a)return;
-    const x=a.x||0,y=a.y||0,z=a.z||0;
-    document.getElementById('ax').textContent=x.toFixed(1);
-    document.getElementById('ay').textContent=y.toFixed(1);
-    document.getElementById('az').textContent=z.toFixed(1);
-    accelBuffer.push({x,y,z});
-    if(accelBuffer.length>50){accelBuffer.shift();classifyActivity();}
-  }
-  function classifyActivity(){
-    const vals=accelBuffer.map(s=>Math.sqrt(s.x**2+s.y**2+s.z**2));
-    const mean=vals.reduce((a,b)=>a+b,0)/vals.length;
-    const v=vals.reduce((a,b)=>a+(b-mean)**2,0)/vals.length;
-    let label, burnRate;
-    if(v<0.3){ label='🧘 Sedentary'; burnRate=0; }
-    else if(v<3.0){ label='🚶 Walking'; burnRate=0.05; totalSteps+=2; }
-    else { label='🏃 Active'; burnRate=0.15; totalSteps+=5; }
-    document.getElementById('activity-label').textContent=label;
-    totalBurn += burnRate;
-    const burnEl = document.getElementById('calories-burned');
-    const stepsEl = document.getElementById('steps-count');
-    if(burnEl) burnEl.textContent = Math.round(totalBurn) + ' kcal';
-    if(stepsEl) stepsEl.textContent = totalSteps.toLocaleString();
-  }
-
   // ── Daily Activity Summary ──
   let selectedWorkout = 'None';
 
@@ -632,9 +565,9 @@
   function saveDailySummary() {
     const steps = parseInt(document.getElementById('steps-input').value) || 0;
     const duration = parseInt(document.getElementById('duration-input').value) || 0;
-    const today = new Date();
-    const dateKey = today.toISOString().split('T')[0];
-    const dayName = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][today.getDay()];
+    const jst = new Date(new Date().getTime() + 9*60*60*1000);
+    const dateKey = jst.toISOString().split('T')[0];
+    const dayName = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][jst.getUTCDay()];
     const entry = { date: dateKey, day: dayName, steps, workout: selectedWorkout, duration };
     const log = JSON.parse(localStorage.getItem('sfc_activity_log') || '{}');
     log[dateKey] = entry;
@@ -651,15 +584,16 @@
     if (!container) return;
     const days = [];
     for (let i = 6; i >= 0; i--) {
-      const d = new Date(); d.setDate(d.getDate() - i);
+      const d = new Date(new Date().getTime() + 9*60*60*1000 - i*86400000);
       days.push(d.toISOString().split('T')[0]);
     }
     const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const todayKey = new Date(new Date().getTime() + 9*60*60*1000).toISOString().split('T')[0];
     container.innerHTML = days.map(dateKey => {
       const entry = log[dateKey];
       const d = new Date(dateKey + 'T00:00:00');
       const label = dayNames[d.getDay()];
-      const isToday = dateKey === new Date().toISOString().split('T')[0];
+      const isToday = dateKey === todayKey;
       if (!entry) {
         return `<div class="card" style="opacity:0.4;">
           <div class="card-icon ci-purple" style="font-size:13px;font-weight:700;">${label}</div>
@@ -678,7 +612,86 @@
 
   renderWeeklyActivity();
 
-  let pomoRunning=false,pomoSeconds=25*60,pomoTotal=25*60,pomoInterval=null;
+  // ── JST date helpers ──
+  function jstDateKey(offsetDays = 0) {
+    const d = new Date();
+    d.setTime(d.getTime() + 9*60*60*1000 + offsetDays*86400000);
+    return d.toISOString().split('T')[0];
+  }
+  function jstWeekDates() {
+    const dates = [];
+    for (let i = 6; i >= 0; i--) dates.push(jstDateKey(-i));
+    return dates;
+  }
+
+  // ── Insights ──
+  const LOC_EMOJI = {'Lawson':'🏪','Coop Cafeteria':'🍱','Salt Dining':'🧂','Subway':'🥖','Other':'📍'};
+  const LOC_CLASS = {'Lawson':'lawson','Coop Cafeteria':'cafe','Salt Dining':'cafe','Subway':'subway','Other':'empty'};
+  const DAY_LABELS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  function renderInsights() {
+    const meals = JSON.parse(localStorage.getItem('sfc_meals') || '[]');
+    const todayKey = jstDateKey();
+    const weekDates = jstWeekDates();
+    const mealsByDate = {};
+    meals.forEach(m => { if (!m.date) return; if (!mealsByDate[m.date]) mealsByDate[m.date]=[]; mealsByDate[m.date].push(m); });
+
+    // Week calendar
+    const daysEl = document.getElementById('insights-week-days');
+    if (daysEl) {
+      daysEl.innerHTML = weekDates.map(dateKey => {
+        const d = new Date(dateKey + 'T00:00:00Z');
+        const dayLabel = DAY_LABELS[d.getUTCDay()];
+        const isToday = dateKey === todayKey;
+        const dayMeals = mealsByDate[dateKey] || [];
+        const topLoc = dayMeals.length > 0 ? dayMeals[0].location : null;
+        const dotClass = topLoc ? (LOC_CLASS[topLoc] || 'empty') : 'empty';
+        const emoji = topLoc ? (LOC_EMOJI[topLoc] || '?') : '·';
+        return `<div class="week-day"><div class="day-label">${dayLabel.toUpperCase()}</div><div class="week-dot ${dotClass}${isToday?' today':''}">${emoji}</div><div class="week-dot-label">${topLoc ? topLoc.split(' ')[0] : '—'}</div></div>`;
+      }).join('');
+    }
+
+    // Location counts
+    const locCounts = {};
+    weekDates.forEach(dateKey => { (mealsByDate[dateKey]||[]).forEach(m => { locCounts[m.location]=(locCounts[m.location]||0)+1; }); });
+    const chartEl = document.getElementById('insights-loc-chart');
+    if (chartEl) {
+      const locs = [{key:'Lawson',label:'🏪 Lawson',cls:'lawson'},{key:'Coop Cafeteria',label:'🍱 Coop',cls:'cafe'},{key:'Salt Dining',label:'🧂 Salt',cls:'cafe'},{key:'Subway',label:'🥖 Subway',cls:'subway'}];
+      const max = Math.max(...locs.map(l=>locCounts[l.key]||0),1);
+      chartEl.innerHTML = locs.map(l => { const count=locCounts[l.key]||0; const pct=Math.round((count/max)*100); return `<div class="loc-bar-row"><div class="loc-bar-label">${l.label}</div><div class="loc-bar-track"><div class="loc-bar-fill ${l.cls}" style="width:${pct}%"></div></div><div class="loc-bar-count">${count}×</div></div>`; }).join('');
+    }
+
+    // Warnings
+    const warningsEl = document.getElementById('insights-warnings');
+    if (warningsEl) {
+      const totalMeals = Object.values(locCounts).reduce((a,b)=>a+b,0);
+      if (totalMeals === 0) { warningsEl.innerHTML='<div style="font-size:13px;color:var(--slate);text-align:center;padding:12px;">Log some meals to see pattern warnings.</div>'; }
+      else {
+        const warnings=[];
+        const lawsonCount=locCounts['Lawson']||0;
+        if(lawsonCount>=4) warnings.push(`<div class="warning-card"><div class="warn-icon">🏪</div><div><div class="warn-title">Too much Lawson (${lawsonCount}×)</div><div class="warn-body">High sodium, low vegetables. Try Coop or Salt Dining for variety.</div></div></div>`);
+        if((locCounts['Coop Cafeteria']||0)+(locCounts['Salt Dining']||0)===0&&totalMeals>=3) warnings.push(`<div class="warning-card"><div class="warn-icon">🍽️</div><div><div class="warn-title">No cafeteria this week</div><div class="warn-body">Try Coop or Salt Dining for a more balanced meal.</div></div></div>`);
+        warningsEl.innerHTML = warnings.length>0 ? warnings.join('') : '<div class="card"><div class="card-icon ci-green">✅</div><div class="card-body"><h3>Looking good this week</h3><p>Good variety across campus food spots.</p></div></div>';
+      }
+    }
+
+    // Rotation
+    const rotEl = document.getElementById('insights-rotation');
+    if (rotEl) {
+      const lawsonHeavy=(locCounts['Lawson']||0)>=3;
+      const noSubway=!(locCounts['Subway']||0);
+      const rotation=[
+        {day:'Mon',loc:lawsonHeavy?'Coop':'Lawson',cls:lawsonHeavy?'rt-cafe':'rt-lawson',emoji:lawsonHeavy?'🍱':'🏪'},
+        {day:'Tue',loc:'Lawson',cls:'rt-lawson',emoji:'🏪'},
+        {day:'Wed',loc:noSubway?'Subway':'Salt',cls:noSubway?'rt-subway':'rt-cafe',emoji:noSubway?'🥖':'🧂'},
+        {day:'Thu',loc:'Coop',cls:'rt-cafe',emoji:'🍱'},
+        {day:'Fri',loc:'Subway',cls:'rt-subway',emoji:'🥖'},
+      ];
+      rotEl.innerHTML = rotation.map(r=>`<span class="rotation-tag ${r.cls}">${r.emoji} ${r.day}</span>`).join('');
+    }
+  }
+
+  renderInsights();,pomoSeconds=25*60,pomoTotal=25*60,pomoInterval=null;
   function togglePomo(){
     if(pomoRunning){clearInterval(pomoInterval);pomoRunning=false;document.getElementById('pomo-btn').textContent='Resume';document.getElementById('pomo-status').textContent='Paused';}
     else{pomoRunning=true;document.getElementById('pomo-btn').textContent='Pause';document.getElementById('pomo-status').textContent='Focus session · in progress';
@@ -751,8 +764,9 @@
   }
 
   function getTodayIndex() {
-    const d = new Date().getDay(); // 0=Sun,1=Mon...5=Fri,6=Sat
-    return d >= 1 && d <= 5 ? d - 1 : -1; // 0=Mon...4=Fri
+    const jst = new Date(new Date().getTime() + 9*60*60*1000);
+    const d = jst.getUTCDay(); // 0=Sun
+    return d >= 1 && d <= 5 ? d - 1 : -1;
   }
 
   function timeToMins(t) {
