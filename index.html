@@ -135,6 +135,20 @@
     .tt-cell input::placeholder{color:var(--slateD);font-size:9px;}
     .tt-save-btn { width:100%; padding:13px; background:var(--teal); color:white; border:none; border-radius:var(--radius); font-size:14px; font-weight:700; cursor:pointer; margin-top:12px; }
     .saved-badge { text-align:center; font-size:12px; color:var(--green); margin-top:8px; display:none; }
+    /* Modal */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:200; align-items:flex-end; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:var(--card); border-radius:20px 20px 0 0; padding:24px 20px 40px; width:100%; max-width:430px; max-height:85vh; overflow-y:auto; }
+    .modal-handle { width:36px; height:4px; background:rgba(255,255,255,.2); border-radius:2px; margin:0 auto 20px; }
+    .modal h2 { font-size:18px; font-weight:700; margin-bottom:18px; }
+    .modal-field { margin-bottom:14px; }
+    .modal-field label { font-size:12px; color:var(--slate); display:block; margin-bottom:6px; }
+    .modal-field input, .modal-field select { width:100%; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); border-radius:8px; color:white; font-size:15px; padding:11px 12px; outline:none; font-family:inherit; }
+    .modal-field input:focus, .modal-field select:focus { border-color:var(--teal); }
+    .modal-field select option { background:var(--card); }
+    .modal-row { display:flex; gap:10px; }
+    .modal-row .modal-field { flex:1; }
+    .modal-close { position:absolute; top:16px; right:16px; background:none; border:none; color:var(--slate); font-size:22px; cursor:pointer; }
     /* Nav */
     .bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:430px; background:var(--card); border-top:1px solid rgba(255,255,255,.06); display:flex; padding:10px 0 24px; z-index:100; }
     .nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; padding:5px 0; border:none; background:none; color:var(--slateD); transition:color .15s; }
@@ -148,7 +162,52 @@
       <div class="header-title" id="page-heading">Nutrition Compass</div>
       <div class="header-sub" id="page-subheading">SFC Campus · Today</div>
     </div>
-    <div class="header-avatar">A</div>
+    <div class="header-avatar" id="avatar-btn" onclick="openProfile()" style="cursor:pointer;">A</div>
+  </div>
+
+  <!-- Profile Modal -->
+  <div class="modal-overlay" id="profile-modal" onclick="closeProfileOutside(event)">
+    <div class="modal" style="position:relative;">
+      <div class="modal-handle"></div>
+      <button class="modal-close" onclick="closeProfile()">✕</button>
+      <h2>⚙️ Profile & Settings</h2>
+
+      <div class="modal-field">
+        <label>Name</label>
+        <input type="text" id="p-name" placeholder="e.g. Arata">
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label>Age</label>
+          <input type="number" id="p-age" placeholder="e.g. 20">
+        </div>
+        <div class="modal-field">
+          <label>Sex</label>
+          <select id="p-sex">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label>Height (cm)</label>
+          <input type="number" id="p-height" placeholder="e.g. 172">
+        </div>
+        <div class="modal-field">
+          <label>Weight (kg)</label>
+          <input type="number" id="p-weight" placeholder="e.g. 65">
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Daily calorie goal (kcal)</label>
+        <input type="number" id="p-goal" placeholder="e.g. 2000">
+        <div style="font-size:11px;color:var(--slateD);margin-top:4px;" id="p-bmr-hint"></div>
+      </div>
+
+      <button class="btn-primary" onclick="saveProfile()">💾 Save</button>
+      <div class="saved-badge" id="profile-saved" style="display:none;">✅ Saved!</div>
+    </div>
   </div>
 
   <!-- HOME -->
@@ -177,7 +236,8 @@
         <h2>Today's Balance</h2>
         <div class="ring-row">
           <div class="ring-stat"><div class="val vg" id="calories-eaten">0</div><div class="lbl">Eaten</div></div>
-          <div class="ring-stat"><div class="val vr" id="calories-deficit">−2000</div><div class="lbl">Deficit</div></div>
+          <div class="ring-stat"><div class="val vo" id="calories-burned">0</div><div class="lbl">Burned</div></div>
+          <div class="ring-stat"><div class="val vr" id="calories-deficit">0</div><div class="lbl">Deficit</div></div>
         </div>
       </div>
     </div>
@@ -329,7 +389,85 @@
   </nav>
 
 <script>
-  // ── JST helpers ──
+  // ── Profile ──
+  function getProfile() { return JSON.parse(localStorage.getItem('sfc_profile') || '{"name":"","age":20,"sex":"male","height":170,"weight":65,"goal":2000}'); }
+
+  function openProfile() {
+    const p = getProfile();
+    document.getElementById('p-name').value = p.name || '';
+    document.getElementById('p-age').value = p.age || '';
+    document.getElementById('p-sex').value = p.sex || 'male';
+    document.getElementById('p-height').value = p.height || '';
+    document.getElementById('p-weight').value = p.weight || '';
+    document.getElementById('p-goal').value = p.goal || '';
+    updateBMRHint();
+    document.getElementById('profile-modal').classList.add('open');
+  }
+
+  function closeProfile() { document.getElementById('profile-modal').classList.remove('open'); }
+  function closeProfileOutside(e) { if (e.target === document.getElementById('profile-modal')) closeProfile(); }
+
+  function updateBMRHint() {
+    const age = parseInt(document.getElementById('p-age').value) || 20;
+    const sex = document.getElementById('p-sex').value;
+    const h = parseInt(document.getElementById('p-height').value) || 170;
+    const w = parseInt(document.getElementById('p-weight').value) || 65;
+    const bmr = sex === 'male' ? 10*w + 6.25*h - 5*age + 5 : 10*w + 6.25*h - 5*age - 161;
+    document.getElementById('p-bmr-hint').textContent = `Estimated BMR: ${Math.round(bmr)} kcal/day (leave blank to use this)`;
+    if (!document.getElementById('p-goal').value) document.getElementById('p-goal').value = Math.round(bmr * 1.55);
+  }
+
+  ['p-age','p-sex','p-height','p-weight'].forEach(id => {
+    setTimeout(() => { const el = document.getElementById(id); if (el) el.addEventListener('input', updateBMRHint); }, 500);
+  });
+
+  function saveProfile() {
+    const age = parseInt(document.getElementById('p-age').value) || 20;
+    const sex = document.getElementById('p-sex').value;
+    const h = parseInt(document.getElementById('p-height').value) || 170;
+    const w = parseInt(document.getElementById('p-weight').value) || 65;
+    const bmr = sex === 'male' ? 10*w + 6.25*h - 5*age + 5 : 10*w + 6.25*h - 5*age - 161;
+    const goal = parseInt(document.getElementById('p-goal').value) || Math.round(bmr * 1.55);
+    const name = document.getElementById('p-name').value.trim();
+    const profile = {name, age, sex, height:h, weight:w, goal};
+    localStorage.setItem('sfc_profile', JSON.stringify(profile));
+    // Update avatar initial
+    const initial = name ? name[0].toUpperCase() : 'A';
+    document.getElementById('avatar-btn').textContent = initial;
+    // Update calorie goal
+    document.getElementById('p-goal').value = goal;
+    const b = document.getElementById('profile-saved');
+    b.style.display='block'; setTimeout(()=>b.style.display='none',2000);
+    updateCalorieBalance();
+  }
+
+  // ── Calorie burn from activity ──
+  function calcBurnedToday() {
+    const p = getProfile();
+    const w = p.weight || 65;
+    const log = JSON.parse(localStorage.getItem('sfc_activity_log') || '{}');
+    const entry = log[jstDateKey()];
+    if (!entry) return 0;
+    let burn = 0;
+    // Steps
+    burn += (entry.steps || 0) * 0.04;
+    // Workouts
+    const workouts = entry.workouts || [];
+    workouts.forEach(wo => {
+      const v = wo.value || wo.duration || 0;
+      const unit = wo.unit || 'min';
+      const MET = {Walking:3.5, Running:8, Cycling:6, Gym:5, Swimming:6, Other:4}[wo.type] || 4;
+      if (unit === 'km') {
+        // speed estimate: walking 5km/h, running 10km/h, cycling 20km/h
+        const speed = {Walking:5, Running:10, Cycling:20}[wo.type] || 8;
+        const hours = v / speed;
+        burn += MET * w * hours;
+      } else {
+        burn += MET * w * (v / 60);
+      }
+    });
+    return Math.round(burn);
+  }
   function jstNow() { return new Date(Date.now() + 9*60*60*1000); }
   function jstDateKey(offsetDays) {
     const d = jstNow();
@@ -500,10 +638,13 @@
 
   function updateCalorieBalance() {
     const meals = todayMeals();
-    const total = meals.reduce((s,m) => s+(m.kcal||0), 0);
-    const goal = 2000, deficit = goal - total;
-    const pct = Math.min(Math.round(total/goal*100), 100);
-    document.getElementById('calories-eaten').textContent = total.toLocaleString();
+    const eaten = meals.reduce((s,m) => s+(m.kcal||0), 0);
+    const burned = calcBurnedToday();
+    const goal = getProfile().goal || 2000;
+    const deficit = goal - eaten + burned;
+    const pct = Math.min(Math.round(eaten/goal*100), 100);
+    document.getElementById('calories-eaten').textContent = eaten.toLocaleString();
+    document.getElementById('calories-burned').textContent = burned.toLocaleString();
     document.getElementById('calories-deficit').textContent = deficit > 0 ? '−'+deficit : '+'+Math.abs(deficit);
     document.getElementById('ring-pct').textContent = pct + '%';
     const offset = 226 - (226 * pct / 100);
@@ -646,6 +787,7 @@
     document.getElementById('duration-input').value = '';
     renderTodayWorkouts();
     renderWeeklyActivity();
+    updateCalorieBalance();
   }
 
   function removeWorkout(dateKey, idx) {
@@ -809,6 +951,8 @@
   }
 
   // ── Init ──
+  const _p = getProfile();
+  if (_p.name) document.getElementById('avatar-btn').textContent = _p.name[0].toUpperCase();
   renderMealLog();
   updateCalorieBalance();
   updateHomeWarnings();
