@@ -259,15 +259,15 @@
     <div class="activity-box">
       <div class="lbl">🏋️ Type</div>
       <div class="workout-btns" id="workout-type-btns">
-        <button class="workout-btn selected" onclick="selectWorkout(this,'Walking')">🚶 Walk</button>
-        <button class="workout-btn" onclick="selectWorkout(this,'Running')">🏃 Run</button>
-        <button class="workout-btn" onclick="selectWorkout(this,'Gym')">🏋️ Gym</button>
-        <button class="workout-btn" onclick="selectWorkout(this,'Swimming')">🏊 Swim</button>
-        <button class="workout-btn" onclick="selectWorkout(this,'Cycling')">🚴 Cycle</button>
-        <button class="workout-btn" onclick="selectWorkout(this,'Other')">➕ Other</button>
+        <button class="workout-btn selected" onclick="selectWorkout(this,'Walking','km')">🚶 Walk</button>
+        <button class="workout-btn" onclick="selectWorkout(this,'Running','km')">🏃 Run</button>
+        <button class="workout-btn" onclick="selectWorkout(this,'Gym','min')">🏋️ Gym</button>
+        <button class="workout-btn" onclick="selectWorkout(this,'Swimming','min')">🏊 Swim</button>
+        <button class="workout-btn" onclick="selectWorkout(this,'Cycling','km')">🚴 Cycle</button>
+        <button class="workout-btn" onclick="selectWorkout(this,'Other','min')">➕ Other</button>
       </div>
-      <div class="lbl" style="margin-top:14px;">⏱ Duration (minutes)</div>
-      <input type="number" id="duration-input" class="num-input" placeholder="e.g. 45" style="margin-top:6px;">
+      <div class="lbl" style="margin-top:14px;">⏱ <span id="workout-unit-label">Distance (km)</span></div>
+      <input type="number" id="duration-input" class="num-input" placeholder="e.g. 5.0" step="0.1" style="margin-top:6px;">
       <button class="btn-primary" style="margin-top:14px;" onclick="addWorkout()">+ Add workout</button>
     </div>
 
@@ -610,10 +610,16 @@
 
   // ── Activity ──
   let selectedWorkout = 'Walking';
-  function selectWorkout(btn, type) {
+  let selectedUnit = 'km';
+  function selectWorkout(btn, type, unit) {
     document.querySelectorAll('.workout-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
     selectedWorkout = type;
+    selectedUnit = unit || 'min';
+    const label = document.getElementById('workout-unit-label');
+    const input = document.getElementById('duration-input');
+    if (unit === 'km') { label.textContent='Distance (km)'; input.placeholder='e.g. 5.0'; input.step='0.1'; }
+    else { label.textContent='Duration (min)'; input.placeholder='e.g. 45'; input.step='1'; }
   }
 
   function saveSteps() {
@@ -629,13 +635,13 @@
   }
 
   function addWorkout() {
-    const duration = parseInt(document.getElementById('duration-input').value) || 0;
-    if (duration <= 0) { alert('Please enter duration in minutes.'); return; }
+    const val = parseFloat(document.getElementById('duration-input').value);
+    if (!val || val <= 0) { alert('Please enter a value.'); return; }
     const log = JSON.parse(localStorage.getItem('sfc_activity_log') || '{}');
     const dateKey = jstDateKey();
     if (!log[dateKey]) log[dateKey] = {date:dateKey, day:DAY_LABELS[jstDOW()], steps:0, workouts:[]};
     if (!log[dateKey].workouts) log[dateKey].workouts = [];
-    log[dateKey].workouts.push({type:selectedWorkout, duration});
+    log[dateKey].workouts.push({type:selectedWorkout, value:val, unit:selectedUnit});
     localStorage.setItem('sfc_activity_log', JSON.stringify(log));
     document.getElementById('duration-input').value = '';
     renderTodayWorkouts();
@@ -662,7 +668,7 @@
     el.innerHTML = workouts.map((w,i) => `
       <div class="card">
         <div class="card-icon ci-orange">🏋️</div>
-        <div class="card-body"><h3>${w.type}</h3><p>${w.duration} min</p></div>
+        <div class="card-body"><h3>${w.type}</h3><p>${w.value} ${w.unit || 'min'}</p></div>
         <button onclick="removeWorkout('${dateKey}',${i})" style="background:rgba(248,113,113,.15);border:none;border-radius:6px;color:var(--red);font-size:11px;padding:4px 8px;cursor:pointer;">✕</button>
       </div>`).join('');
   }
@@ -682,7 +688,7 @@
       const isToday = dk===todayKey;
       if (!entry) return `<div class="card" style="opacity:.4;"><div class="card-icon ci-purple" style="font-size:12px;font-weight:700;">${label}</div><div class="card-body"><h3 style="color:var(--slate);">No data</h3></div>${isToday?'<div class="card-right" style="color:var(--mint);font-size:11px;">Today</div>':''}</div>`;
       const workouts = entry.workouts || (entry.workout && entry.workout!=='None' ? [{type:entry.workout,duration:entry.duration}] : []);
-      const wt = workouts.length===0 ? 'Rest day' : workouts.map(w=>`${w.type} ${w.duration}min`).join(' · ');
+      const wt = workouts.length===0 ? 'Rest day' : workouts.map(w=>`${w.type} ${w.value}${w.unit||'min'}`).join(' · ');
       return `<div class="card"${isToday?' style="border:1px solid rgba(13,148,136,.3);"':''}><div class="card-icon ci-teal" style="font-size:12px;font-weight:700;">${label}</div><div class="card-body"><h3>👟 ${(entry.steps||0).toLocaleString()} steps</h3><p>${wt}</p></div>${isToday?'<div class="card-right" style="color:var(--mint);font-size:11px;">Today</div>':''}</div>`;
     }).join('');
   }
