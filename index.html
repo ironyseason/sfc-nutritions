@@ -81,7 +81,7 @@
     .meal-name { font-size:14px; font-weight:600; }
     .meal-meta { font-size:11px; color:var(--slate); margin-top:2px; }
     .meal-kcal { font-size:14px; font-weight:700; color:var(--orange); }
-    .photo-zone { display:block; width:100%; background:var(--card); border:2px dashed var(--slateD); border-radius:var(--radius); padding:32px 20px; text-align:center; cursor:pointer; margin-bottom:10px; box-sizing:border-box; }
+    .photo-zone { background:var(--card); border:2px dashed var(--slateD); border-radius:var(--radius); padding:32px 20px; text-align:center; cursor:pointer; margin-bottom:10px; }
     .photo-zone .icon { font-size:34px; margin-bottom:8px; }
     .photo-zone h3 { font-size:15px; font-weight:600; margin-bottom:4px; }
     .photo-zone p { font-size:12px; color:var(--slate); }
@@ -112,44 +112,6 @@
     .nav-item.active { color:var(--mint); }
     .nav-icon { font-size:21px; }
     .nav-lbl { font-size:10px; font-weight:600; }
-
-    /* ── Timetable ── */
-    .schedule-card { background:var(--card); border-radius:var(--radius); padding:16px; margin-bottom:10px; }
-    .schedule-card .next-label { font-size:11px; color:var(--slate); margin-bottom:4px; }
-    .schedule-card .next-class { font-size:17px; font-weight:700; margin-bottom:3px; }
-    .schedule-card .next-meta { font-size:12px; color:var(--slate); }
-    .schedule-card .time-pill {
-      display:inline-block; background:rgba(13,148,136,.2); color:var(--mint);
-      border-radius:20px; padding:3px 10px; font-size:12px; font-weight:700;
-      margin-top:8px;
-    }
-    .schedule-card .free-pill {
-      display:inline-block; background:rgba(52,211,153,.15); color:var(--green);
-      border-radius:20px; padding:3px 10px; font-size:12px; font-weight:700;
-      margin-top:8px;
-    }
-    .schedule-eat-tip { font-size:12px; color:var(--slate); margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,.06); }
-
-    .tt-grid { display:grid; grid-template-columns:36px repeat(5,1fr); gap:4px; margin-top:12px; }
-    .tt-head { font-size:10px; font-weight:700; color:var(--slate); text-align:center; padding:4px 0; }
-    .tt-period { font-size:10px; color:var(--slate); display:flex; align-items:center; justify-content:center; font-weight:600; }
-    .tt-cell {
-      border-radius:8px; padding:0; overflow:hidden;
-    }
-    .tt-cell input {
-      width:100%; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08);
-      border-radius:8px; color:var(--white); font-size:10px; padding:7px 5px;
-      text-align:center; outline:none; font-family:inherit;
-    }
-    .tt-cell input:focus { border-color:var(--teal); background:rgba(13,148,136,.1); }
-    .tt-cell input::placeholder { color:var(--slateD); font-size:9px; }
-    .tt-period-time { font-size:9px; color:var(--slateD); text-align:center; margin-top:2px; }
-    .tt-save-btn { width:100%; padding:13px; background:var(--teal); color:white; border:none; border-radius:var(--radius); font-size:14px; font-weight:700; cursor:pointer; margin-top:12px; }
-    .tt-saved-badge { text-align:center; font-size:12px; color:var(--green); margin-top:8px; display:none; }
-
-    /* ── Workout buttons ── */
-    .workout-btn { padding:7px 10px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.05); border-radius:8px; color:var(--slate); font-size:12px; cursor:pointer; font-family:inherit; transition:all .15s; }
-    .workout-btn.selected { border-color:var(--teal); color:var(--mint); background:rgba(13,148,136,.15); }
   </style>
 </head>
 <body>
@@ -164,15 +126,6 @@
   <!-- HOME -->
   <div class="page active" id="page-home">
     <div class="loc-badge">📍 <span id="current-location">Detecting...</span></div>
-    <p class="section-label">Today's Schedule</p>
-    <div class="schedule-card" id="home-schedule">
-      <div class="next-label">Next class</div>
-      <div class="next-class" id="sch-next-class">—</div>
-      <div class="next-meta" id="sch-next-meta"></div>
-      <span id="sch-time-pill"></span>
-      <div class="schedule-eat-tip" id="sch-eat-tip"></div>
-    </div>
-
     <p class="section-label">Calorie Balance</p>
     <div class="ring-card">
       <div class="ring-wrap">
@@ -180,13 +133,14 @@
           <circle cx="43" cy="43" r="36" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="7"/>
           <circle cx="43" cy="43" r="36" fill="none" stroke="#0D9488" stroke-width="7" stroke-dasharray="226" stroke-dashoffset="91" stroke-linecap="round"/>
         </svg>
-        <div class="ring-center"><span class="ring-num" id="ring-pct">60%</span><span class="ring-unit">of goal</span></div>
+        <div class="ring-center"><span class="ring-num">60%</span><span class="ring-unit">of goal</span></div>
       </div>
       <div class="ring-info">
         <h2>Today's Balance</h2>
         <div class="ring-row">
-          <div class="ring-stat"><div class="val vg" id="calories-eaten">0</div><div class="lbl">Eaten</div></div>
-          <div class="ring-stat"><div class="val vr" id="calories-deficit">0</div><div class="lbl">Deficit</div></div>
+          <div class="ring-stat"><div class="val vg">1,240</div><div class="lbl">Eaten</div></div>
+          <div class="ring-stat"><div class="val vo">380</div><div class="lbl">Burned</div></div>
+          <div class="ring-stat"><div class="val vr">−480</div><div class="lbl">Deficit</div></div>
         </div>
       </div>
     </div>
@@ -194,7 +148,7 @@
     <div class="suggestion-card">
       <div class="tag">📍 Near Lawson · <span id="current-time"></span></div>
       <div class="meal">Tuna onigiri + green tea</div>
-      <div class="reason" id="ai-recommendation">480kcal deficit and light activity today. A snack now keeps energy up for the afternoon.</div>
+      <div class="reason">480kcal deficit and light activity today. A snack now keeps energy up for the afternoon.</div>
       <div class="kcal-badge">~320 kcal</div>
     </div>
     <p class="section-label">⚠️ Pattern Alerts</p>
@@ -202,7 +156,7 @@
       <div class="warn-icon">🏪</div>
       <div>
         <div class="warn-title">Lawson 5 days in a row</div>
-        <div class="warn-body">You've eaten at Lawson every day this week. High sodium, low vegetable variety. Try Coop Cafeteria or Salt Dining today.</div>
+        <div class="warn-body">You've eaten at Lawson every day this week. High sodium, low vegetable variety. Try the cafeteria or Subway today.</div>
       </div>
     </div>
     <p class="section-label">This Week</p>
@@ -213,12 +167,8 @@
     </div>
     <p class="section-label">Where to eat today</p>
     <div class="card">
-      <div class="card-icon ci-purple">🍱</div>
-      <div class="card-body"><h3>Try Coop Cafeteria</h3><p>Good value lunch set, more balanced than Lawson. Usually less crowded after 13:15.</p></div>
-    </div>
-    <div class="card">
-      <div class="card-icon ci-teal">🧂</div>
-      <div class="card-body"><h3>Or Salt Dining</h3><p>More variety, slightly pricier. Good option if you want something different from the Coop.</p></div>
+      <div class="card-icon ci-purple">🍽️</div>
+      <div class="card-body"><h3>Try the cafeteria</h3><p>You've been to Lawson every day this week. The cafeteria lunch set has better nutritional balance and more vegetables.</p></div>
     </div>
     <div class="card">
       <div class="card-icon ci-orange">🥖</div>
@@ -238,20 +188,18 @@
     <p class="section-label">Where are you eating?</p>
     <div class="loc-selector">
       <button class="loc-btn selected" onclick="selectLoc(this)"><span class="loc-emoji">🏪</span>Lawson</button>
-      <button class="loc-btn" onclick="selectLoc(this)"><span class="loc-emoji">🍱</span>Coop</button>
-      <button class="loc-btn" onclick="selectLoc(this)"><span class="loc-emoji">🧂</span>Salt</button>
+      <button class="loc-btn" onclick="selectLoc(this)"><span class="loc-emoji">🍽️</span>Cafeteria</button>
       <button class="loc-btn" onclick="selectLoc(this)"><span class="loc-emoji">🥖</span>Subway</button>
       <button class="loc-btn" onclick="selectLoc(this)"><span class="loc-emoji">📍</span>Other</button>
     </div>
     <button class="btn-secondary">✏️ &nbsp;Enter manually instead</button>
     <p class="section-label">Today's Meals</p>
-    <div id="meal-log-list">
     <div class="meal-item">
       <div class="meal-left"><div class="meal-loc-dot mld-lawson"></div><div><div class="meal-name">Salmon onigiri</div><div class="meal-meta">🏪 Lawson · 8:42 AM</div></div></div>
       <div class="meal-kcal">190 kcal</div>
     </div>
     <div class="meal-item">
-      <div class="meal-left"><div class="meal-loc-dot mld-cafe"></div><div><div class="meal-name">Curry rice set</div><div class="meal-meta">🍱 Coop Cafeteria · 12:15 PM</div></div></div>
+      <div class="meal-left"><div class="meal-loc-dot mld-cafe"></div><div><div class="meal-name">Curry rice set</div><div class="meal-meta">🍽️ Cafeteria · 12:15 PM</div></div></div>
       <div class="meal-kcal">650 kcal</div>
     </div>
     <div class="meal-item">
@@ -262,7 +210,6 @@
       <div class="meal-left"><div class="meal-loc-dot mld-subway"></div><div><div class="meal-name">Tuna sub 6"</div><div class="meal-meta">🥖 Subway · 9:15 AM</div></div></div>
       <div class="meal-kcal">340 kcal</div>
     </div>
-    </div>
   </div>
 
   <!-- INSIGHTS -->
@@ -270,70 +217,65 @@
     <p class="section-label">This Week's Pattern</p>
     <div class="week-grid">
       <h3>Where you ate 📍</h3>
-      <div class="week-days" id="insights-week-days"></div>
+      <div class="week-days">
+        <div class="week-day"><div class="day-label">MON</div><div class="week-dot lawson">🏪</div><div class="week-dot-label">Lawson</div></div>
+        <div class="week-day"><div class="day-label">TUE</div><div class="week-dot lawson">🏪</div><div class="week-dot-label">Lawson</div></div>
+        <div class="week-day"><div class="day-label">WED</div><div class="week-dot cafe">🍽️</div><div class="week-dot-label">Cafe</div></div>
+        <div class="week-day"><div class="day-label">THU</div><div class="week-dot lawson">🏪</div><div class="week-dot-label">Lawson</div></div>
+        <div class="week-day"><div class="day-label">FRI</div><div class="week-dot subway">🥖</div><div class="week-dot-label">Subway</div></div>
+        <div class="week-day"><div class="day-label">SAT</div><div class="week-dot lawson">🏪</div><div class="week-dot-label">Lawson</div></div>
+        <div class="week-day"><div class="day-label">SUN</div><div class="week-dot today lawson">🏪</div><div class="week-dot-label">Today</div></div>
+      </div>
     </div>
     <div class="loc-chart">
       <h3>Location breakdown this week</h3>
-      <div id="insights-loc-chart"></div>
+      <div class="loc-bar-row"><div class="loc-bar-label">🏪 Lawson</div><div class="loc-bar-track"><div class="loc-bar-fill lawson" style="width:71%"></div></div><div class="loc-bar-count">5×</div></div>
+      <div class="loc-bar-row"><div class="loc-bar-label">🍽️ Cafeteria</div><div class="loc-bar-track"><div class="loc-bar-fill cafe" style="width:14%"></div></div><div class="loc-bar-count">1×</div></div>
+      <div class="loc-bar-row"><div class="loc-bar-label">🥖 Subway</div><div class="loc-bar-track"><div class="loc-bar-fill subway" style="width:14%"></div></div><div class="loc-bar-count">1×</div></div>
     </div>
     <p class="section-label">Warnings</p>
-    <div id="insights-warnings">
-      <div style="font-size:13px;color:var(--slate);text-align:center;padding:20px;">Log some meals to see patterns.</div>
+    <div class="warning-card">
+      <div class="warn-icon">🏪</div>
+      <div><div class="warn-title">Too much Lawson</div><div class="warn-body">5 out of 7 days. High sodium, low vegetables. Try mixing in the cafeteria more next week.</div></div>
+    </div>
+    <div class="warning-card">
+      <div class="warn-icon">🧂</div>
+      <div><div class="warn-title">Sodium high this week</div><div class="warn-body">Estimated 3,800mg avg/day vs 2,300mg recommended. Onigiri and packaged items add up fast.</div></div>
     </div>
     <p class="section-label">Next Week Rotation</p>
-    <div id="insights-rotation" class="chip-row"></div>
-    <div style="font-size:11px;color:var(--slate);margin-top:4px;margin-bottom:12px;">Suggested rotation for better variety</div>
+    <div class="chip-row">
+      <span class="rotation-tag rt-cafe">🍽️ Mon</span>
+      <span class="rotation-tag rt-lawson">🏪 Tue</span>
+      <span class="rotation-tag rt-subway">🥖 Wed</span>
+      <span class="rotation-tag rt-cafe">🍽️ Thu</span>
+      <span class="rotation-tag rt-lawson">🏪 Fri</span>
+    </div>
+    <div style="font-size:11px;color:var(--slate);margin-top:4px;margin-bottom:12px;">AI-suggested rotation for better variety</div>
     <div class="card">
       <div class="card-icon ci-green">💡</div>
-      <div class="card-body"><h3>Aim: 2× Coop, 1× Salt, 2× Lawson, 1× Subway</h3><p>Better nutritional balance. Mixing both cafeterias adds more variety to your week.</p></div>
+      <div class="card-body"><h3>Aim: 3× cafeteria, 2× Lawson, 1× Subway</h3><p>Better nutritional balance based on your activity level and this week's deficit pattern.</p></div>
     </div>
   </div>
 
   <!-- ACTIVITY -->
   <div class="page" id="page-activity">
-    <p class="section-label">Today's Summary</p>
+    <p class="section-label">Current State</p>
     <div class="activity-state">
-      <div style="display:flex;flex-direction:column;gap:14px;">
-
-        <div>
-          <div class="state-label">👟 Steps today</div>
-          <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
-            <input type="number" id="steps-input" placeholder="e.g. 8200"
-              style="flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:white;font-size:16px;padding:10px 12px;outline:none;font-family:inherit;">
-            <div style="font-size:12px;color:var(--slate);">steps</div>
-          </div>
-          <div style="font-size:11px;color:var(--slateD);margin-top:4px;">Check iPhone Health app → Steps</div>
-        </div>
-
-        <div>
-          <div class="state-label">🏋️ Workout</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;" id="workout-type-btns">
-            <button class="workout-btn" onclick="selectWorkout(this,'None')">😴 None</button>
-            <button class="workout-btn" onclick="selectWorkout(this,'Walking')">🚶 Walk</button>
-            <button class="workout-btn" onclick="selectWorkout(this,'Running')">🏃 Run</button>
-            <button class="workout-btn" onclick="selectWorkout(this,'Gym')">🏋️ Gym</button>
-            <button class="workout-btn" onclick="selectWorkout(this,'Swimming')">🏊 Swim</button>
-            <button class="workout-btn" onclick="selectWorkout(this,'Cycling')">🚴 Cycle</button>
-            <button class="workout-btn" onclick="selectWorkout(this,'Other')">➕ Other</button>
-          </div>
-        </div>
-
-        <div id="workout-duration-wrap" style="display:none;">
-          <div class="state-label">⏱ Duration</div>
-          <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
-            <input type="number" id="duration-input" placeholder="e.g. 45"
-              style="flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:white;font-size:16px;padding:10px 12px;outline:none;font-family:inherit;">
-            <div style="font-size:12px;color:var(--slate);">min</div>
-          </div>
-        </div>
-
+      <div class="state-label">Classified as</div>
+      <div class="state-val" id="activity-label">Tap Start to begin</div>
+      <div class="accel-values">
+        <div class="accel-item"><div class="axis">X</div><div class="av" id="ax">—</div></div>
+        <div class="accel-item"><div class="axis">Y</div><div class="av" id="ay">—</div></div>
+        <div class="accel-item"><div class="axis">Z</div><div class="av" id="az">—</div></div>
       </div>
-      <button class="btn-primary" style="margin-top:16px;" onclick="saveDailySummary()">💾 Save today's summary</button>
-      <div id="activity-saved-badge" style="display:none;text-align:center;font-size:12px;color:var(--green);margin-top:8px;">✅ Saved!</div>
     </div>
-
-    <p class="section-label">This Week</p>
-    <div id="weekly-activity-list"></div>
+    <button class="btn-primary" id="accel-btn" onclick="startAccel()">Start Sensing</button>
+    <p class="section-label">Gym Session</p>
+    <div class="card"><div class="card-icon ci-orange">🏋️</div><div class="card-body"><h3>Log a gym session</h3><p>GPS detected you may have been at the gym</p></div></div>
+    <button class="btn-secondary" onclick="showGymLog()">+ Log gym activity</button>
+    <p class="section-label">Today's Burn</p>
+    <div class="card"><div class="card-icon ci-green">🔥</div><div class="card-body"><h3>Calories burned</h3><p>From activity today</p></div><div class="card-right vo">380 kcal</div></div>
+    <div class="card"><div class="card-icon ci-teal">🚶</div><div class="card-body"><h3>Steps (estimated)</h3><p>From accelerometer</p></div><div class="card-right">4,210</div></div>
   </div>
 
   <!-- STUDY -->
@@ -360,34 +302,12 @@
     <div class="card"><div class="card-icon ci-teal">✅</div><div class="card-body"><h3>Session 2 complete</h3><p>25 min · Library · 1:40 PM</p></div><div class="card-right vg">Done</div></div>
   </div>
 
-  <!-- TIMETABLE -->
-  <div class="page" id="page-timetable">
-    <p class="section-label">時間割 · Timetable</p>
-    <div style="font-size:12px;color:var(--slate);margin-bottom:14px;">授業名を入力して保存。空欄 = 空きコマ。学期中はそのまま使えます。</div>
-
-    <div class="tt-grid" id="tt-grid">
-      <div class="tt-head"></div>
-      <div class="tt-head">月</div>
-      <div class="tt-head">火</div>
-      <div class="tt-head">水</div>
-      <div class="tt-head">木</div>
-      <div class="tt-head">金</div>
-    </div>
-
-    <button class="tt-save-btn" onclick="saveTimetable()">💾 Save timetable</button>
-    <div class="tt-saved-badge" id="tt-saved">✅ Saved! Schedule is active.</div>
-
-    <p class="section-label" style="margin-top:20px;">Today's classes</p>
-    <div id="tt-today-list"></div>
-  </div>
-
   <nav class="bottom-nav">
     <button class="nav-item active" onclick="showPage('home','Nutrition Compass','SFC Campus · Today',this)"><span class="nav-icon">🏠</span><span class="nav-lbl">Home</span></button>
     <button class="nav-item" onclick="showPage('food','Food Log','Tap to log a meal',this)"><span class="nav-icon">🍱</span><span class="nav-lbl">Food</span></button>
     <button class="nav-item" onclick="showPage('insights','Weekly Insights','Your eating patterns',this)"><span class="nav-icon">📊</span><span class="nav-lbl">Insights</span></button>
     <button class="nav-item" onclick="showPage('activity','Activity','Sensing motion',this)"><span class="nav-icon">🏃</span><span class="nav-lbl">Activity</span></button>
     <button class="nav-item" onclick="showPage('pomo','Study Timer','Library Pomodoro',this)"><span class="nav-icon">📚</span><span class="nav-lbl">Study</span></button>
-    <button class="nav-item" onclick="showPage('timetable','Timetable','Your SFC schedule',this)"><span class="nav-icon">🗓️</span><span class="nav-lbl">Schedule</span></button>
   </nav>
 
 <script>
@@ -408,12 +328,11 @@
     navigator.geolocation.getCurrentPosition(pos=>{
       const {latitude:lat,longitude:lng}=pos.coords;
       const zones=[
-        {name:'🏪 Lawson',lat:35.3870481,lng:139.4259664},
-        {name:'🍱 Coop Cafeteria',lat:35.3872544,lng:139.4259882},
-        {name:'🧂 Salt Dining',lat:35.3896278,lng:139.4278322},
-        {name:'🥖 Subway',lat:35.3875548,lng:139.4274225},
-        {name:'📚 Library',lat:35.3882948,lng:139.4273095},
-        {name:'🏋️ Gym',lat:35.3902808,lng:139.4269813},
+        {name:'🏪 Lawson',lat:35.3885,lng:139.4275},
+        {name:'🍽️ Cafeteria',lat:35.3890,lng:139.4265},
+        {name:'🥖 Subway',lat:35.3882,lng:139.4280},
+        {name:'📚 Library',lat:35.3895,lng:139.4260},
+        {name:'🏋️ Gym',lat:35.3878,lng:139.4270},
       ];
       let nearest=null,minD=Infinity;
       zones.forEach(z=>{
@@ -428,270 +347,39 @@
   startGPS();
 
   function selectLoc(btn){document.querySelectorAll('.loc-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');}
-  const API = '/.netlify/functions/ai';
+  function handlePhoto(input){if(input.files&&input.files[0])alert('📷 Photo received!\n\nIn the real app, this sends to GPT-4o Vision which identifies the food and logs calories automatically.');}
 
-  async function handlePhoto(input) {
-    if (!input.files || !input.files[0]) return;
-    const file = input.files[0];
-
-    // Show loading state
-    const zone = document.querySelector('.photo-zone h3');
-    const origText = zone.textContent;
-    zone.textContent = '🔍 Identifying food...';
-
-    try {
-      // Convert image to base64
-      const base64 = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-
-      // Call GPT-4o Vision
-      const res = await fetch(API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'food', imageBase64: base64 })
-      });
-      const data = await res.json();
-
-      if (data.name) {
-        // Add to meal log
-        addMealToLog(data.name, data.kcal, data.location);
-        zone.textContent = origText;
-        alert(`✅ Logged!\n\n${data.name} (${data.nameJa})\n${data.kcal} kcal\n📍 ${data.location}`);
-      } else {
-        zone.textContent = origText;
-        alert('Could not identify food. Try again or enter manually.');
-      }
-    } catch (err) {
-      zone.textContent = origText;
-      alert('Error: ' + err.message);
-    }
+  let accelRunning=false,accelBuffer=[];
+  function startAccel(){
+    if(accelRunning){window.removeEventListener('devicemotion',onMotion);accelRunning=false;document.getElementById('accel-btn').textContent='Start Sensing';document.getElementById('activity-label').textContent='Stopped';return;}
+    const go=()=>{window.addEventListener('devicemotion',onMotion);accelRunning=true;document.getElementById('accel-btn').textContent='Stop Sensing';};
+    if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){
+      DeviceMotionEvent.requestPermission().then(s=>{if(s==='granted')go();else alert('Motion permission denied.');}).catch(console.error);
+    }else go();
+  }
+  function onMotion(e){
+    const a=e.accelerationIncludingGravity;if(!a)return;
+    const x=a.x||0,y=a.y||0,z=a.z||0;
+    document.getElementById('ax').textContent=x.toFixed(1);
+    document.getElementById('ay').textContent=y.toFixed(1);
+    document.getElementById('az').textContent=z.toFixed(1);
+    accelBuffer.push({x,y,z});
+    if(accelBuffer.length>50){accelBuffer.shift();classifyActivity();}
+  }
+  function classifyActivity(){
+    const vals=accelBuffer.map(s=>Math.sqrt(s.x**2+s.y**2+s.z**2));
+    const mean=vals.reduce((a,b)=>a+b,0)/vals.length;
+    const v=vals.reduce((a,b)=>a+(b-mean)**2,0)/vals.length;
+    document.getElementById('activity-label').textContent=v<0.3?'🧘 Sedentary':v<3.0?'🚶 Walking':'🏃 Active';
   }
 
-  function addMealToLog(name, kcal, location) {
-    const meals = JSON.parse(localStorage.getItem('sfc_meals') || '[]');
-    const now = new Date();
-    const jst = new Date(now.getTime() + 9*60*60*1000);
-    const time = jst.getUTCHours().toString().padStart(2,'0') + ':' + jst.getUTCMinutes().toString().padStart(2,'0');
-    const dateKey = jst.toISOString().split('T')[0];
-    const locEmoji = { 'Lawson':'🏪', 'Coop Cafeteria':'🍱', 'Salt Dining':'🧂', 'Subway':'🥖', 'Other':'📍' };
-    meals.push({ name, kcal, location, time, date: dateKey, emoji: locEmoji[location] || '📍' });
-    localStorage.setItem('sfc_meals', JSON.stringify(meals));
-    renderMealLog();
-    updateCalorieBalance();
-    renderInsights();
+  function showGymLog(){
+    const opts=['Treadmill','Weights','Group class','Other'];
+    const c=prompt('What did you do?\n'+opts.map((o,i)=>`${i+1}. ${o}`).join('\n')+'\n\nEnter 1–4:');
+    if(c&&opts[c-1])alert('✅ Logged: '+opts[c-1]+'\nCalorie burn estimated and added.');
   }
 
-  function renderMealLog() {
-    const meals = JSON.parse(localStorage.getItem('sfc_meals') || '[]');
-    const container = document.getElementById('meal-log-list');
-    if (!container) return;
-    if (meals.length === 0) {
-      container.innerHTML = '<div style="font-size:13px;color:var(--slate);text-align:center;padding:20px;">No meals logged today</div>';
-      return;
-    }
-    container.innerHTML = meals.map(m => `
-      <div class="meal-item">
-        <div class="meal-left">
-          <div class="meal-loc-dot" style="background:${locColor(m.location)}"></div>
-          <div>
-            <div class="meal-name">${m.name}</div>
-            <div class="meal-meta">${m.emoji} ${m.location} · ${m.time}</div>
-          </div>
-        </div>
-        <div class="meal-kcal">${m.kcal} kcal</div>
-      </div>
-    `).reverse().join('');
-  }
-
-  function locColor(loc) {
-    return { 'Lawson':'#0D9488', 'Coop Cafeteria':'#A78BFA', 'Salt Dining':'#A78BFA', 'Subway':'#FB923C' }[loc] || '#94A3B8';
-  }
-
-  function updateCalorieBalance() {
-    const meals = JSON.parse(localStorage.getItem('sfc_meals') || '[]');
-    const total = meals.reduce((sum, m) => sum + (m.kcal || 0), 0);
-    const goal = 2000;
-    const deficit = goal - total;
-    const pct = Math.min(Math.round((total / goal) * 100), 100);
-    const el = document.getElementById('calories-eaten');
-    const defEl = document.getElementById('calories-deficit');
-    const pctEl = document.getElementById('ring-pct');
-    if (el) el.textContent = total.toLocaleString();
-    if (defEl) defEl.textContent = deficit > 0 ? '−' + deficit : '+' + Math.abs(deficit);
-    if (pctEl) pctEl.textContent = pct + '%';
-  }
-
-  async function getRecommendation() {
-    const meals = JSON.parse(localStorage.getItem('sfc_meals') || '[]');
-    const total = meals.reduce((sum, m) => sum + (m.kcal || 0), 0);
-    const deficit = 2000 - total;
-    const now = new Date();
-    const timeOfDay = now.getHours() < 11 ? 'morning' : now.getHours() < 14 ? 'lunch time' : now.getHours() < 17 ? 'afternoon' : 'evening';
-    const location = document.getElementById('current-location').textContent;
-
-    try {
-      const res = await fetch(API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'recommend', deficit, activityLevel: 'light activity', location, timeOfDay })
-      });
-      const data = await res.json();
-      const el = document.getElementById('ai-recommendation');
-      if (el && data.recommendation) el.textContent = data.recommendation;
-    } catch (err) {
-      console.error('Recommendation error:', err);
-    }
-  }
-
-  // Load meal log and update balance on start
-  renderMealLog();
-  updateCalorieBalance();
-  setTimeout(getRecommendation, 2000);
-
-  // ── Daily Activity Summary ──
-  let selectedWorkout = 'None';
-
-  function selectWorkout(btn, type) {
-    document.querySelectorAll('.workout-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    selectedWorkout = type;
-    document.getElementById('workout-duration-wrap').style.display = type === 'None' ? 'none' : 'block';
-  }
-
-  function saveDailySummary() {
-    const steps = parseInt(document.getElementById('steps-input').value) || 0;
-    const duration = parseInt(document.getElementById('duration-input').value) || 0;
-    const jst = new Date(new Date().getTime() + 9*60*60*1000);
-    const dateKey = jst.toISOString().split('T')[0];
-    const dayName = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][jst.getUTCDay()];
-    const entry = { date: dateKey, day: dayName, steps, workout: selectedWorkout, duration };
-    const log = JSON.parse(localStorage.getItem('sfc_activity_log') || '{}');
-    log[dateKey] = entry;
-    localStorage.setItem('sfc_activity_log', JSON.stringify(log));
-    const badge = document.getElementById('activity-saved-badge');
-    badge.style.display = 'block';
-    setTimeout(() => badge.style.display = 'none', 2000);
-    renderWeeklyActivity();
-  }
-
-  function renderWeeklyActivity() {
-    const log = JSON.parse(localStorage.getItem('sfc_activity_log') || '{}');
-    const container = document.getElementById('weekly-activity-list');
-    if (!container) return;
-    const days = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(new Date().getTime() + 9*60*60*1000 - i*86400000);
-      days.push(d.toISOString().split('T')[0]);
-    }
-    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    const todayKey = new Date(new Date().getTime() + 9*60*60*1000).toISOString().split('T')[0];
-    container.innerHTML = days.map(dateKey => {
-      const entry = log[dateKey];
-      const d = new Date(dateKey + 'T00:00:00');
-      const label = dayNames[d.getDay()];
-      const isToday = dateKey === todayKey;
-      if (!entry) {
-        return `<div class="card" style="opacity:0.4;">
-          <div class="card-icon ci-purple" style="font-size:13px;font-weight:700;">${label}</div>
-          <div class="card-body"><h3 style="color:var(--slate);">No data</h3></div>
-          ${isToday ? '<div class="card-right" style="color:var(--mint);font-size:11px;">Today</div>' : ''}
-        </div>`;
-      }
-      const workoutText = entry.workout === 'None' ? 'Rest day' : `${entry.workout} · ${entry.duration} min`;
-      return `<div class="card" style="${isToday ? 'border:1px solid rgba(13,148,136,.3);' : ''}">
-        <div class="card-icon ci-teal" style="font-size:13px;font-weight:700;">${label}</div>
-        <div class="card-body"><h3>👟 ${entry.steps.toLocaleString()} steps</h3><p>${workoutText}</p></div>
-        ${isToday ? '<div class="card-right" style="color:var(--mint);font-size:11px;">Today</div>' : ''}
-      </div>`;
-    }).join('');
-  }
-
-  renderWeeklyActivity();
-
-  // ── JST date helpers ──
-  function jstDateKey(offsetDays = 0) {
-    const d = new Date();
-    d.setTime(d.getTime() + 9*60*60*1000 + offsetDays*86400000);
-    return d.toISOString().split('T')[0];
-  }
-  function jstWeekDates() {
-    const dates = [];
-    for (let i = 6; i >= 0; i--) dates.push(jstDateKey(-i));
-    return dates;
-  }
-
-  // ── Insights ──
-  const LOC_EMOJI = {'Lawson':'🏪','Coop Cafeteria':'🍱','Salt Dining':'🧂','Subway':'🥖','Other':'📍'};
-  const LOC_CLASS = {'Lawson':'lawson','Coop Cafeteria':'cafe','Salt Dining':'cafe','Subway':'subway','Other':'empty'};
-  const DAY_LABELS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-
-  function renderInsights() {
-    const meals = JSON.parse(localStorage.getItem('sfc_meals') || '[]');
-    const todayKey = jstDateKey();
-    const weekDates = jstWeekDates();
-    const mealsByDate = {};
-    meals.forEach(m => { if (!m.date) return; if (!mealsByDate[m.date]) mealsByDate[m.date]=[]; mealsByDate[m.date].push(m); });
-
-    // Week calendar
-    const daysEl = document.getElementById('insights-week-days');
-    if (daysEl) {
-      daysEl.innerHTML = weekDates.map(dateKey => {
-        const d = new Date(dateKey + 'T00:00:00Z');
-        const dayLabel = DAY_LABELS[d.getUTCDay()];
-        const isToday = dateKey === todayKey;
-        const dayMeals = mealsByDate[dateKey] || [];
-        const topLoc = dayMeals.length > 0 ? dayMeals[0].location : null;
-        const dotClass = topLoc ? (LOC_CLASS[topLoc] || 'empty') : 'empty';
-        const emoji = topLoc ? (LOC_EMOJI[topLoc] || '?') : '·';
-        return `<div class="week-day"><div class="day-label">${dayLabel.toUpperCase()}</div><div class="week-dot ${dotClass}${isToday?' today':''}">${emoji}</div><div class="week-dot-label">${topLoc ? topLoc.split(' ')[0] : '—'}</div></div>`;
-      }).join('');
-    }
-
-    // Location counts
-    const locCounts = {};
-    weekDates.forEach(dateKey => { (mealsByDate[dateKey]||[]).forEach(m => { locCounts[m.location]=(locCounts[m.location]||0)+1; }); });
-    const chartEl = document.getElementById('insights-loc-chart');
-    if (chartEl) {
-      const locs = [{key:'Lawson',label:'🏪 Lawson',cls:'lawson'},{key:'Coop Cafeteria',label:'🍱 Coop',cls:'cafe'},{key:'Salt Dining',label:'🧂 Salt',cls:'cafe'},{key:'Subway',label:'🥖 Subway',cls:'subway'}];
-      const max = Math.max(...locs.map(l=>locCounts[l.key]||0),1);
-      chartEl.innerHTML = locs.map(l => { const count=locCounts[l.key]||0; const pct=Math.round((count/max)*100); return `<div class="loc-bar-row"><div class="loc-bar-label">${l.label}</div><div class="loc-bar-track"><div class="loc-bar-fill ${l.cls}" style="width:${pct}%"></div></div><div class="loc-bar-count">${count}×</div></div>`; }).join('');
-    }
-
-    // Warnings
-    const warningsEl = document.getElementById('insights-warnings');
-    if (warningsEl) {
-      const totalMeals = Object.values(locCounts).reduce((a,b)=>a+b,0);
-      if (totalMeals === 0) { warningsEl.innerHTML='<div style="font-size:13px;color:var(--slate);text-align:center;padding:12px;">Log some meals to see pattern warnings.</div>'; }
-      else {
-        const warnings=[];
-        const lawsonCount=locCounts['Lawson']||0;
-        if(lawsonCount>=4) warnings.push(`<div class="warning-card"><div class="warn-icon">🏪</div><div><div class="warn-title">Too much Lawson (${lawsonCount}×)</div><div class="warn-body">High sodium, low vegetables. Try Coop or Salt Dining for variety.</div></div></div>`);
-        if((locCounts['Coop Cafeteria']||0)+(locCounts['Salt Dining']||0)===0&&totalMeals>=3) warnings.push(`<div class="warning-card"><div class="warn-icon">🍽️</div><div><div class="warn-title">No cafeteria this week</div><div class="warn-body">Try Coop or Salt Dining for a more balanced meal.</div></div></div>`);
-        warningsEl.innerHTML = warnings.length>0 ? warnings.join('') : '<div class="card"><div class="card-icon ci-green">✅</div><div class="card-body"><h3>Looking good this week</h3><p>Good variety across campus food spots.</p></div></div>';
-      }
-    }
-
-    // Rotation
-    const rotEl = document.getElementById('insights-rotation');
-    if (rotEl) {
-      const lawsonHeavy=(locCounts['Lawson']||0)>=3;
-      const noSubway=!(locCounts['Subway']||0);
-      const rotation=[
-        {day:'Mon',loc:lawsonHeavy?'Coop':'Lawson',cls:lawsonHeavy?'rt-cafe':'rt-lawson',emoji:lawsonHeavy?'🍱':'🏪'},
-        {day:'Tue',loc:'Lawson',cls:'rt-lawson',emoji:'🏪'},
-        {day:'Wed',loc:noSubway?'Subway':'Salt',cls:noSubway?'rt-subway':'rt-cafe',emoji:noSubway?'🥖':'🧂'},
-        {day:'Thu',loc:'Coop',cls:'rt-cafe',emoji:'🍱'},
-        {day:'Fri',loc:'Subway',cls:'rt-subway',emoji:'🥖'},
-      ];
-      rotEl.innerHTML = rotation.map(r=>`<span class="rotation-tag ${r.cls}">${r.emoji} ${r.day}</span>`).join('');
-    }
-  }
-
-  renderInsights();,pomoSeconds=25*60,pomoTotal=25*60,pomoInterval=null;
+  let pomoRunning=false,pomoSeconds=25*60,pomoTotal=25*60,pomoInterval=null;
   function togglePomo(){
     if(pomoRunning){clearInterval(pomoInterval);pomoRunning=false;document.getElementById('pomo-btn').textContent='Resume';document.getElementById('pomo-status').textContent='Paused';}
     else{pomoRunning=true;document.getElementById('pomo-btn').textContent='Pause';document.getElementById('pomo-status').textContent='Focus session · in progress';
@@ -704,181 +392,6 @@
     document.getElementById('pomo-display').textContent=Math.floor(pomoSeconds/60).toString().padStart(2,'0')+':'+( pomoSeconds%60).toString().padStart(2,'0');
     document.getElementById('pomo-bar').style.width=((pomoTotal-pomoSeconds)/pomoTotal*100)+'%';
   }
-
-  // ── Timetable ──
-  const DAYS = ['月','火','水','木','金'];
-  const PERIODS = [
-    { label:'1限', start:'09:25', end:'10:55' },
-    { label:'2限', start:'11:10', end:'12:40' },
-    { label:'3限', start:'13:00', end:'14:30' },
-    { label:'4限', start:'14:45', end:'16:15' },
-    { label:'5限', start:'16:30', end:'18:00' },
-  ];
-
-  // Build grid
-  const grid = document.getElementById('tt-grid');
-  PERIODS.forEach((p, pi) => {
-    const periodCell = document.createElement('div');
-    periodCell.className = 'tt-period';
-    periodCell.innerHTML = `<div><div>${p.label}</div><div class="tt-period-time">${p.start}</div></div>`;
-    grid.appendChild(periodCell);
-    DAYS.forEach((d, di) => {
-      const cell = document.createElement('div');
-      cell.className = 'tt-cell';
-      const inp = document.createElement('input');
-      inp.type = 'text';
-      inp.placeholder = '空き';
-      inp.id = `tt_${di}_${pi}`;
-      cell.appendChild(inp);
-      grid.appendChild(cell);
-    });
-  });
-
-  // Load saved timetable
-  function loadTimetable() {
-    const saved = JSON.parse(localStorage.getItem('sfc_timetable') || 'null');
-    if (!saved) return;
-    DAYS.forEach((d, di) => {
-      PERIODS.forEach((p, pi) => {
-        const el = document.getElementById(`tt_${di}_${pi}`);
-        if (el && saved[di] && saved[di][pi]) el.value = saved[di][pi];
-      });
-    });
-    updateScheduleHome();
-    renderTodayList();
-  }
-
-  function saveTimetable() {
-    const data = DAYS.map((d, di) =>
-      PERIODS.map((p, pi) => {
-        const el = document.getElementById(`tt_${di}_${pi}`);
-        return el ? el.value.trim() : '';
-      })
-    );
-    localStorage.setItem('sfc_timetable', JSON.stringify(data));
-    const badge = document.getElementById('tt-saved');
-    badge.style.display = 'block';
-    setTimeout(() => badge.style.display = 'none', 2500);
-    updateScheduleHome();
-    renderTodayList();
-  }
-
-  function getTodayIndex() {
-    const jst = new Date(new Date().getTime() + 9*60*60*1000);
-    const d = jst.getUTCDay(); // 0=Sun
-    return d >= 1 && d <= 5 ? d - 1 : -1;
-  }
-
-  function timeToMins(t) {
-    const [h, m] = t.split(':').map(Number);
-    return h * 60 + m;
-  }
-
-  function getNowMins() {
-    const n = new Date();
-    return n.getHours() * 60 + n.getMinutes();
-  }
-
-  function updateScheduleHome() {
-    const saved = JSON.parse(localStorage.getItem('sfc_timetable') || 'null');
-    const nextClassEl = document.getElementById('sch-next-class');
-    const nextMetaEl = document.getElementById('sch-next-meta');
-    const pillEl = document.getElementById('sch-time-pill');
-    const tipEl = document.getElementById('sch-eat-tip');
-
-    if (!saved) {
-      nextClassEl.textContent = 'No schedule saved';
-      nextMetaEl.textContent = 'Go to Schedule tab to set up your timetable';
-      pillEl.innerHTML = '';
-      tipEl.textContent = '';
-      return;
-    }
-
-    const todayIdx = getTodayIndex();
-    if (todayIdx === -1) {
-      nextClassEl.textContent = '休日 · No classes today';
-      nextMetaEl.textContent = 'Weekend — eat wherever you like!';
-      pillEl.innerHTML = '<span class="free-pill">🎉 No classes</span>';
-      tipEl.textContent = '';
-      return;
-    }
-
-    const nowMins = getNowMins();
-    let nextClass = null, nextPeriod = null;
-    let currentClass = null, currentPeriod = null;
-
-    PERIODS.forEach((p, pi) => {
-      const name = saved[todayIdx][pi];
-      const start = timeToMins(p.start);
-      const end = timeToMins(p.end);
-      if (name) {
-        if (nowMins >= start && nowMins <= end) { currentClass = name; currentPeriod = p; }
-        else if (nowMins < start && !nextClass) { nextClass = name; nextPeriod = p; }
-      }
-    });
-
-    if (currentClass) {
-      nextClassEl.textContent = currentClass;
-      nextMetaEl.textContent = `In progress · ${currentPeriod.label} · ends ${currentPeriod.end}`;
-      pillEl.innerHTML = '<span class="time-pill">📖 Now in class</span>';
-      tipEl.textContent = '';
-    } else if (nextClass) {
-      const minsUntil = timeToMins(nextPeriod.start) - nowMins;
-      nextClassEl.textContent = nextClass;
-      nextMetaEl.textContent = `${nextPeriod.label} · starts ${nextPeriod.start}`;
-      pillEl.innerHTML = `<span class="time-pill">⏱ ${minsUntil} min away</span>`;
-
-      // Eating tip based on time available
-      if (minsUntil <= 15) {
-        tipEl.textContent = '⚡ Only ' + minsUntil + ' min until class — grab something at Lawson and eat on the way.';
-      } else if (minsUntil <= 45) {
-        tipEl.textContent = '🥖 About ' + minsUntil + ' min — Subway or Lawson, eat quickly.';
-      } else {
-        tipEl.textContent = '🍽️ Plenty of time — the cafeteria is a good option.';
-      }
-    } else {
-      nextClassEl.textContent = 'No more classes today';
-      nextMetaEl.textContent = 'Done for the day!';
-      pillEl.innerHTML = '<span class="free-pill">✅ Classes done</span>';
-      tipEl.textContent = '🎉 Take your time — cafeteria or anywhere you like.';
-    }
-  }
-
-  function renderTodayList() {
-    const saved = JSON.parse(localStorage.getItem('sfc_timetable') || 'null');
-    const container = document.getElementById('tt-today-list');
-    const todayIdx = getTodayIndex();
-    if (!saved || todayIdx === -1) {
-      container.innerHTML = '<div style="font-size:13px;color:var(--slate);">No classes today.</div>';
-      return;
-    }
-    const nowMins = getNowMins();
-    container.innerHTML = '';
-    PERIODS.forEach((p, pi) => {
-      const name = saved[todayIdx][pi];
-      const start = timeToMins(p.start);
-      const end = timeToMins(p.end);
-      const isPast = nowMins > end;
-      const isCurrent = nowMins >= start && nowMins <= end;
-      const div = document.createElement('div');
-      div.className = 'card';
-      div.style.opacity = isPast ? '0.45' : '1';
-      const iconColor = isCurrent ? 'ci-teal' : isPast ? 'ci-green' : 'ci-purple';
-      const icon = isCurrent ? '📖' : isPast ? '✅' : '🔵';
-      div.innerHTML = `
-        <div class="card-icon ${iconColor}">${icon}</div>
-        <div class="card-body">
-          <h3>${name || '空きコマ · Free period'}</h3>
-          <p>${p.label} · ${p.start}–${p.end}</p>
-        </div>
-        ${isCurrent ? '<div class="card-right" style="color:var(--mint);font-weight:700;">Now</div>' : ''}
-      `;
-      container.appendChild(div);
-    });
-  }
-
-  loadTimetable();
-  setInterval(updateScheduleHome, 60000); // update every minute
 </script>
 </body>
 </html>
