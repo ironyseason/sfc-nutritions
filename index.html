@@ -421,6 +421,18 @@
     input.value = '';
   }
 
+  function editMealKcal(idx) {
+    const meals = JSON.parse(localStorage.getItem('sfc_meals') || '[]');
+    const meal = meals[idx];
+    if (!meal) return;
+    const newKcal = parseInt(prompt(`Edit calories for "${meal.name}"\nCurrent: ${meal.kcal} kcal\n\nEnter correct value:`));
+    if (isNaN(newKcal) || newKcal < 0) return;
+    meals[idx].kcal = newKcal;
+    localStorage.setItem('sfc_meals', JSON.stringify(meals));
+    renderMealLog();
+    updateCalorieBalance();
+  }
+
   function showManualEntry() {
     const name = prompt('Food name:');
     if (!name) return;
@@ -456,14 +468,19 @@
     const el = document.getElementById('meal-log-list');
     if (!el) return;
     if (meals.length === 0) { el.innerHTML='<div style="font-size:13px;color:var(--slate);text-align:center;padding:20px;">No meals logged today</div>'; return; }
-    el.innerHTML = [...meals].reverse().map(m => `
+    el.innerHTML = [...meals].reverse().map((m,i) => {
+      const idx = meals.length - 1 - i;
+      return `
       <div class="meal-item">
         <div class="meal-left">
           <div class="meal-loc-dot" style="background:${LOC_COLOR[m.location]||'#94A3B8'}"></div>
           <div><div class="meal-name">${m.name}</div><div class="meal-meta">${m.emoji||'📍'} ${m.location} · ${m.time}</div></div>
         </div>
-        <div class="meal-kcal">${m.kcal} kcal</div>
-      </div>`).join('');
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="meal-kcal">${m.kcal} kcal</div>
+          <button onclick="editMealKcal(${idx})" style="background:rgba(255,255,255,.08);border:none;border-radius:6px;color:var(--slate);font-size:11px;padding:4px 8px;cursor:pointer;">✏️</button>
+        </div>
+      </div>`}).join('');
   }
 
   function updateCalorieBalance() {
