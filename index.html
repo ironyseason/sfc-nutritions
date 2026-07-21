@@ -146,6 +146,10 @@
     .tt-period-time { font-size:9px; color:var(--slateD); text-align:center; margin-top:2px; }
     .tt-save-btn { width:100%; padding:13px; background:var(--teal); color:white; border:none; border-radius:var(--radius); font-size:14px; font-weight:700; cursor:pointer; margin-top:12px; }
     .tt-saved-badge { text-align:center; font-size:12px; color:var(--green); margin-top:8px; display:none; }
+
+    /* ── Workout buttons ── */
+    .workout-btn { padding:7px 10px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.05); border-radius:8px; color:var(--slate); font-size:12px; cursor:pointer; font-family:inherit; transition:all .15s; }
+    .workout-btn.selected { border-color:var(--teal); color:var(--mint); background:rgba(13,148,136,.15); }
   </style>
 </head>
 <body>
@@ -181,9 +185,9 @@
       <div class="ring-info">
         <h2>Today's Balance</h2>
         <div class="ring-row">
-          <div class="ring-stat"><div class="val vg" id="calories-eaten">1,240</div><div class="lbl">Eaten</div></div>
-          <div class="ring-stat"><div class="val vo">380</div><div class="lbl">Burned</div></div>
-          <div class="ring-stat"><div class="val vr" id="calories-deficit">−480</div><div class="lbl">Deficit</div></div>
+          <div class="ring-stat"><div class="val vg" id="calories-eaten">0</div><div class="lbl">Eaten</div></div>
+          <div class="ring-stat"><div class="val vo" id="calories-burned-home">0</div><div class="lbl">Burned</div></div>
+          <div class="ring-stat"><div class="val vr" id="calories-deficit">0</div><div class="lbl">Deficit</div></div>
         </div>
       </div>
     </div>
@@ -321,12 +325,50 @@
       </div>
     </div>
     <button class="btn-primary" id="accel-btn" onclick="startAccel()">Start Sensing</button>
-    <p class="section-label">Gym Session</p>
-    <div class="card"><div class="card-icon ci-orange">🏋️</div><div class="card-body"><h3>Log a gym session</h3><p>GPS detected you may have been at the gym</p></div></div>
-    <button class="btn-secondary" onclick="showGymLog()">+ Log gym activity</button>
-    <p class="section-label">Today's Burn</p>
-    <div class="card"><div class="card-icon ci-green">🔥</div><div class="card-body"><h3>Calories burned</h3><p>From activity today</p></div><div class="card-right vo">380 kcal</div></div>
-    <div class="card"><div class="card-icon ci-teal">🚶</div><div class="card-body"><h3>Steps (estimated)</h3><p>From accelerometer</p></div><div class="card-right">4,210</div></div>
+
+    <p class="section-label">Today's Summary</p>
+    <div class="activity-state">
+      <div style="display:flex;flex-direction:column;gap:14px;">
+
+        <div>
+          <div class="state-label">👟 Steps today</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+            <input type="number" id="steps-input" placeholder="e.g. 8200"
+              style="flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:white;font-size:16px;padding:10px 12px;outline:none;font-family:inherit;">
+            <div style="font-size:12px;color:var(--slate);">steps</div>
+          </div>
+          <div style="font-size:11px;color:var(--slateD);margin-top:4px;">Check iPhone Health app → Steps</div>
+        </div>
+
+        <div>
+          <div class="state-label">🏋️ Workout</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;" id="workout-type-btns">
+            <button class="workout-btn" onclick="selectWorkout(this,'None')">😴 None</button>
+            <button class="workout-btn" onclick="selectWorkout(this,'Walking')">🚶 Walk</button>
+            <button class="workout-btn" onclick="selectWorkout(this,'Running')">🏃 Run</button>
+            <button class="workout-btn" onclick="selectWorkout(this,'Gym')">🏋️ Gym</button>
+            <button class="workout-btn" onclick="selectWorkout(this,'Swimming')">🏊 Swim</button>
+            <button class="workout-btn" onclick="selectWorkout(this,'Cycling')">🚴 Cycle</button>
+            <button class="workout-btn" onclick="selectWorkout(this,'Other')">➕ Other</button>
+          </div>
+        </div>
+
+        <div id="workout-duration-wrap" style="display:none;">
+          <div class="state-label">⏱ Duration</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+            <input type="number" id="duration-input" placeholder="e.g. 45"
+              style="flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:white;font-size:16px;padding:10px 12px;outline:none;font-family:inherit;">
+            <div style="font-size:12px;color:var(--slate);">min</div>
+          </div>
+        </div>
+
+      </div>
+      <button class="btn-primary" style="margin-top:16px;" onclick="saveDailySummary()">💾 Save today's summary</button>
+      <div id="activity-saved-badge" style="display:none;text-align:center;font-size:12px;color:var(--green);margin-top:8px;">✅ Saved!</div>
+    </div>
+
+    <p class="section-label">This Week</p>
+    <div id="weekly-activity-list"></div>
   </div>
 
   <!-- STUDY -->
@@ -510,9 +552,11 @@
     const el = document.getElementById('calories-eaten');
     const defEl = document.getElementById('calories-deficit');
     const pctEl = document.getElementById('ring-pct');
+    const burnHomeEl = document.getElementById('calories-burned-home');
     if (el) el.textContent = total.toLocaleString();
     if (defEl) defEl.textContent = deficit > 0 ? '−' + deficit : '+' + Math.abs(deficit);
     if (pctEl) pctEl.textContent = pct + '%';
+    if (burnHomeEl) burnHomeEl.textContent = Math.round(totalBurn);
   }
 
   async function getRecommendation() {
@@ -542,7 +586,7 @@
   updateCalorieBalance();
   setTimeout(getRecommendation, 2000);
 
-  let accelRunning=false,accelBuffer=[];
+  let accelRunning=false,accelBuffer=[],totalSteps=0,totalBurn=0;
   function startAccel(){
     if(accelRunning){window.removeEventListener('devicemotion',onMotion);accelRunning=false;document.getElementById('accel-btn').textContent='Start Sensing';document.getElementById('activity-label').textContent='Stopped';return;}
     const go=()=>{window.addEventListener('devicemotion',onMotion);accelRunning=true;document.getElementById('accel-btn').textContent='Stop Sensing';};
@@ -563,14 +607,76 @@
     const vals=accelBuffer.map(s=>Math.sqrt(s.x**2+s.y**2+s.z**2));
     const mean=vals.reduce((a,b)=>a+b,0)/vals.length;
     const v=vals.reduce((a,b)=>a+(b-mean)**2,0)/vals.length;
-    document.getElementById('activity-label').textContent=v<0.3?'🧘 Sedentary':v<3.0?'🚶 Walking':'🏃 Active';
+    let label, burnRate;
+    if(v<0.3){ label='🧘 Sedentary'; burnRate=0; }
+    else if(v<3.0){ label='🚶 Walking'; burnRate=0.05; totalSteps+=2; }
+    else { label='🏃 Active'; burnRate=0.15; totalSteps+=5; }
+    document.getElementById('activity-label').textContent=label;
+    totalBurn += burnRate;
+    const burnEl = document.getElementById('calories-burned');
+    const stepsEl = document.getElementById('steps-count');
+    if(burnEl) burnEl.textContent = Math.round(totalBurn) + ' kcal';
+    if(stepsEl) stepsEl.textContent = totalSteps.toLocaleString();
   }
 
-  function showGymLog(){
-    const opts=['Treadmill','Weights','Group class','Other'];
-    const c=prompt('What did you do?\n'+opts.map((o,i)=>`${i+1}. ${o}`).join('\n')+'\n\nEnter 1–4:');
-    if(c&&opts[c-1])alert('✅ Logged: '+opts[c-1]+'\nCalorie burn estimated and added.');
+  // ── Daily Activity Summary ──
+  let selectedWorkout = 'None';
+
+  function selectWorkout(btn, type) {
+    document.querySelectorAll('.workout-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedWorkout = type;
+    document.getElementById('workout-duration-wrap').style.display = type === 'None' ? 'none' : 'block';
   }
+
+  function saveDailySummary() {
+    const steps = parseInt(document.getElementById('steps-input').value) || 0;
+    const duration = parseInt(document.getElementById('duration-input').value) || 0;
+    const today = new Date();
+    const dateKey = today.toISOString().split('T')[0];
+    const dayName = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][today.getDay()];
+    const entry = { date: dateKey, day: dayName, steps, workout: selectedWorkout, duration };
+    const log = JSON.parse(localStorage.getItem('sfc_activity_log') || '{}');
+    log[dateKey] = entry;
+    localStorage.setItem('sfc_activity_log', JSON.stringify(log));
+    const badge = document.getElementById('activity-saved-badge');
+    badge.style.display = 'block';
+    setTimeout(() => badge.style.display = 'none', 2000);
+    renderWeeklyActivity();
+  }
+
+  function renderWeeklyActivity() {
+    const log = JSON.parse(localStorage.getItem('sfc_activity_log') || '{}');
+    const container = document.getElementById('weekly-activity-list');
+    if (!container) return;
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      days.push(d.toISOString().split('T')[0]);
+    }
+    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    container.innerHTML = days.map(dateKey => {
+      const entry = log[dateKey];
+      const d = new Date(dateKey + 'T00:00:00');
+      const label = dayNames[d.getDay()];
+      const isToday = dateKey === new Date().toISOString().split('T')[0];
+      if (!entry) {
+        return `<div class="card" style="opacity:0.4;">
+          <div class="card-icon ci-purple" style="font-size:13px;font-weight:700;">${label}</div>
+          <div class="card-body"><h3 style="color:var(--slate);">No data</h3></div>
+          ${isToday ? '<div class="card-right" style="color:var(--mint);font-size:11px;">Today</div>' : ''}
+        </div>`;
+      }
+      const workoutText = entry.workout === 'None' ? 'Rest day' : `${entry.workout} · ${entry.duration} min`;
+      return `<div class="card" style="${isToday ? 'border:1px solid rgba(13,148,136,.3);' : ''}">
+        <div class="card-icon ci-teal" style="font-size:13px;font-weight:700;">${label}</div>
+        <div class="card-body"><h3>👟 ${entry.steps.toLocaleString()} steps</h3><p>${workoutText}</p></div>
+        ${isToday ? '<div class="card-right" style="color:var(--mint);font-size:11px;">Today</div>' : ''}
+      </div>`;
+    }).join('');
+  }
+
+  renderWeeklyActivity();
 
   let pomoRunning=false,pomoSeconds=25*60,pomoTotal=25*60,pomoInterval=null;
   function togglePomo(){
